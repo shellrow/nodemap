@@ -5,4 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "nodemap_core"
+crate-type = ["staticlib"]
+#crate-type = ["cdylib"]
+
 [dependencies]
+cxx = "1.0"
