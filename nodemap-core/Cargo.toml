@@ -2,8 +2,13 @@
 name = "nodemap-core"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["shellrow <shellrow@protonmail.com>"]
+description = "Cross-platform network mapper"
+repository = "https://github.com/shellrow/nodemap"
+readme = "README.md"
+keywords = ["network","security","scan","cli","cross-platform"]
+categories = ["network-programming"]
+license = "MIT"
 
 [lib]
 name = "nodemap_core"
@@ -11,4 +16,22 @@ crate-type = ["staticlib"]
 #crate-type = ["cdylib"]
 
 [dependencies]
-cxx = "1.0"
+cxx = { version = "1.0", optional = true }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+default-net = "0.11.0"
+netscan = { version = "0.11.0", features = ["full"] }
+ipnet = "2.5.0"
+regex = "1.6.0"
+chrono = "0.4"
+sudo = "0.6"
+dns-lookup = "1.0"
+native-tls = "0.2"
+async-io = "1.7.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi = { version = "0.3.9", features = ["std","handleapi", "processthreadsapi", "winnt", "securitybaseapi", "impl-default"] }
+
+[features]
+cpp = ["cxx"]
+default = ["cpp"]
