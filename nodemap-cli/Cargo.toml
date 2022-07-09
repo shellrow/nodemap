@@ -6,3 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+nodemap-core = { path = "../nodemap-core", version = "0.1.0", default-features = false}
+clap = { version = "3.1", features = ["cargo"] }
