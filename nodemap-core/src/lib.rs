@@ -1,6 +1,7 @@
 pub mod option;
 pub mod result;
 pub mod process;
+pub mod sys;
 pub mod scan;
 
 // All of the following is test code for cxx
