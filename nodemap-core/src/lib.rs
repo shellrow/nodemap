@@ -1,8 +1,10 @@
-// All of the following is test code for cxx
+mod option;
 
 //use std::time::Duration;
 use std::fs::read_to_string;
 
+
+// All of the following is test code for cxx
 #[cxx::bridge]
 mod ffi {
     pub struct PortOption {
@@ -40,6 +42,7 @@ pub fn get_test_ports() -> Vec<u16> {
     vec![20,21,22,23,25,53,80,110,119,123,143,161,194,443]
 }
 
+#[allow(dead_code)]
 impl ffi::PortOption {
     pub fn new() -> ffi::PortOption {
         ffi::PortOption {
