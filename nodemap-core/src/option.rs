@@ -1,8 +1,5 @@
-use netscan::setting::ScanType;
 use std::time::Duration;
-use std::fs::read_to_string;
-use std::net::{IpAddr, Ipv4Addr};
-use ipnet::Ipv4Net;
+use std::net::IpAddr;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ExecType {
@@ -48,6 +45,8 @@ pub struct TargetInfo {
     pub ip_addr: IpAddr,
     pub host_name: String,
     pub ports: Vec<u16>,
+    pub base_uri: String,
+    pub base_domain: String,
 }
 
 #[derive(Clone, Debug)]

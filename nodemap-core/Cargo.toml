@@ -20,7 +20,7 @@ cxx = { version = "1.0", optional = true }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 default-net = "0.11.0"
-netscan = { version = "0.11.0", features = ["full"] }
+netscan = { version = "0.12.0", features = ["full"] }
 webscan = "0.4.0"
 tracert = "0.3.1"
 ipnet = "2.5.0"

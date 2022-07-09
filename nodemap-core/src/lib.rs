@@ -1,13 +1,13 @@
-mod option;
-mod result;
-mod process;
-mod handler;
-
-//use std::time::Duration;
-use std::fs::read_to_string;
-
+pub mod option;
+pub mod result;
+pub mod process;
+pub mod scan;
 
 // All of the following is test code for cxx
+#[cfg(feature = "cpp")]
+use std::fs::read_to_string;
+
+#[cfg(feature = "cpp")]
 #[cxx::bridge]
 mod ffi {
     pub struct PortOption {
@@ -36,15 +36,18 @@ mod ffi {
     }
 }
 
+#[cfg(feature = "cpp")]
 pub struct TestResult {
     pub ip_addr: String,
     pub ports: Vec<u16>,
 }
 
+#[cfg(feature = "cpp")]
 pub fn get_test_ports() -> Vec<u16> {
     vec![20,21,22,23,25,53,80,110,119,123,143,161,194,443]
 }
 
+#[cfg(feature = "cpp")]
 #[allow(dead_code)]
 impl ffi::PortOption {
     pub fn new() -> ffi::PortOption {
