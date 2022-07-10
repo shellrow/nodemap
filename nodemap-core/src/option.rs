@@ -52,7 +52,7 @@ pub struct TargetInfo {
 #[derive(Clone, Debug)]
 pub struct ScanOption {
     pub exec_type: CommandType,
-    pub interface_index: u16,
+    pub interface_index: u32,
     pub interface_name: String,
     pub src_ip: IpAddr,
     pub src_port: u16,
