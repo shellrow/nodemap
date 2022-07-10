@@ -19,9 +19,9 @@ fn main() {
     }
     let app = get_app_settings();
     let matches = app.get_matches();
-    let opt: option::ScanOption = parser::parse_port_args(matches);
+    let opt: option::ScanOption = parser::parse_args(matches);
     match opt.exec_type {
-        option::ExecType::PortScan => {
+        option::CommandType::PortScan => {
             match opt.port_scan_type {
                 netscan::setting::ScanType::TcpSynScan => {
                     if !process::privileged() {
@@ -30,14 +30,30 @@ fn main() {
                 },
                 _ => {},
             }
+            
+
         },
-        option::ExecType::HostScan => {},
-        option::ExecType::Ping => {},
-        option::ExecType::Traceroute => {},
-        option::ExecType::UriScan => {},
-        option::ExecType::DomainScan => {},
-        option::ExecType::BatchScan => {},
-        option::ExecType::PassiveScan => {},
+        option::CommandType::HostScan => {
+            
+        },
+        option::CommandType::Ping => {
+            
+        },
+        option::CommandType::Traceroute => {
+            
+        },
+        option::CommandType::UriScan => {
+            
+        },
+        option::CommandType::DomainScan => {
+            
+        },
+        option::CommandType::BatchScan => {
+            
+        },
+        option::CommandType::PassiveScan => {
+            
+        },
     }
     show_banner_with_starttime();
     exit_with_error_message("test");
