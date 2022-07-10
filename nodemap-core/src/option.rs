@@ -2,7 +2,7 @@ use std::time::Duration;
 use std::net::{IpAddr, Ipv4Addr};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum ExecType {
+pub enum CommandType {
     PortScan,
     HostScan,
     Ping,
@@ -13,29 +13,29 @@ pub enum ExecType {
     PassiveScan
 }
 
-impl ExecType {
+impl CommandType {
     pub fn name(&self) -> String {
         match *self {
-            ExecType::PortScan => String::from("Port scan"),
-            ExecType::HostScan => String::from("Host scan"),
-            ExecType::Ping => String::from("Ping"),
-            ExecType::Traceroute => String::from("Traceroute"),
-            ExecType::UriScan => String::from("URI scan"),
-            ExecType::DomainScan => String::from("Domain scan"),
-            ExecType::BatchScan => String::from("Batch scan"),
-            ExecType::PassiveScan => String::from("Passive scan"),
+            CommandType::PortScan => String::from("Port scan"),
+            CommandType::HostScan => String::from("Host scan"),
+            CommandType::Ping => String::from("Ping"),
+            CommandType::Traceroute => String::from("Traceroute"),
+            CommandType::UriScan => String::from("URI scan"),
+            CommandType::DomainScan => String::from("Domain scan"),
+            CommandType::BatchScan => String::from("Batch scan"),
+            CommandType::PassiveScan => String::from("Passive scan"),
         }
     }
     pub fn description(&self) -> String {
         match *self {
-            ExecType::PortScan => String::from("Port scan"),
-            ExecType::HostScan => String::from("Host scan"),
-            ExecType::Ping => String::from("Ping"),
-            ExecType::Traceroute => String::from("Traceroute"),
-            ExecType::UriScan => String::from("URI scan"),
-            ExecType::DomainScan => String::from("Domain scan"),
-            ExecType::BatchScan => String::from("Batch scan"),
-            ExecType::PassiveScan => String::from("Passive scan"),
+            CommandType::PortScan => String::from("Port scan"),
+            CommandType::HostScan => String::from("Host scan"),
+            CommandType::Ping => String::from("Ping"),
+            CommandType::Traceroute => String::from("Traceroute"),
+            CommandType::UriScan => String::from("URI scan"),
+            CommandType::DomainScan => String::from("Domain scan"),
+            CommandType::BatchScan => String::from("Batch scan"),
+            CommandType::PassiveScan => String::from("Passive scan"),
         }
     }
 }
@@ -51,7 +51,7 @@ pub struct TargetInfo {
 
 #[derive(Clone, Debug)]
 pub struct ScanOption {
-    pub exec_type: ExecType,
+    pub exec_type: CommandType,
     pub interface_index: u16,
     pub interface_name: String,
     pub src_ip: IpAddr,
@@ -82,7 +82,7 @@ pub struct ScanOption {
 impl ScanOption {
     pub fn new() -> ScanOption {
         ScanOption{
-            exec_type: ExecType::PortScan,
+            exec_type: CommandType::PortScan,
             interface_index: u16::MIN,
             interface_name: String::new(),
             src_ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
