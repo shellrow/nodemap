@@ -68,9 +68,21 @@ pub struct TargetInfo {
     pub base_domain: String,
 }
 
+impl TargetInfo {
+    pub fn new() -> TargetInfo {
+        TargetInfo {
+            ip_addr: IpAddr::V4(Ipv4Addr::LOCALHOST),
+            host_name: String::new(),
+            ports: vec![],
+            base_uri: String::new(),
+            base_domain: String::new(),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ScanOption {
-    pub exec_type: CommandType,
+    pub command_type: CommandType,
     pub interface_index: u32,
     pub interface_name: String,
     pub src_ip: IpAddr,
@@ -101,7 +113,7 @@ pub struct ScanOption {
 impl ScanOption {
     pub fn new() -> ScanOption {
         ScanOption{
-            exec_type: CommandType::PortScan,
+            command_type: CommandType::PortScan,
             interface_index: u32::MIN,
             interface_name: String::new(),
             src_ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
