@@ -1,5 +1,9 @@
 use std::time::Duration;
 use std::net::{IpAddr, Ipv4Addr};
+use std::fs::read_to_string;
+use ipnet::Ipv4Net;
+
+use super::network;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CommandType {
@@ -78,6 +82,65 @@ impl TargetInfo {
             base_domain: String::new(),
         }
     }
+    pub fn new_with_ip_addr(ip_addr: IpAddr) -> TargetInfo {
+        TargetInfo {
+            ip_addr: ip_addr,
+            host_name: String::new(),
+            ports: vec![],
+            base_uri: String::new(),
+            base_domain: String::new(),
+        }
+    }
+    pub fn new_with_base_uri(base_uri: String) -> TargetInfo {
+        TargetInfo {
+            ip_addr: IpAddr::V4(Ipv4Addr::LOCALHOST),
+            host_name: String::new(),
+            ports: vec![],
+            base_uri: base_uri,
+            base_domain: String::new(),
+        }
+    }
+    pub fn new_with_base_domain(base_domain: String) -> TargetInfo {
+        TargetInfo {
+            ip_addr: IpAddr::V4(Ipv4Addr::LOCALHOST),
+            host_name: String::new(),
+            ports: vec![],
+            base_uri: String::new(),
+            base_domain: base_domain,
+        }
+    }
+    pub fn set_dst_ports_from_range(&mut self, from_v: u16, to_v: u16) {
+        for port in from_v..to_v {
+            self.ports.push(port);
+        }
+    }
+    pub fn set_dst_ports_from_csv(&mut self, v: String) {
+        let values: Vec<&str> = v.split(",").collect();
+        for p in values {
+            match p.parse::<u16>(){
+                Ok(port) =>{
+                    self.ports.push(port);
+                },
+                Err(_) =>{},
+            }
+        }
+    }
+    pub fn set_dst_ports_from_list(&mut self, v: String) {
+        let data = read_to_string(v);
+        let text = match data {
+            Ok(content) => content,
+            Err(_) => String::new(),
+        };
+        let port_list: Vec<&str> = text.trim().split("\n").collect();
+        for port in port_list {
+            match port.parse::<u16>(){
+                Ok(p) =>{
+                    self.ports.push(p);
+                },
+                Err(_) =>{},
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -139,6 +202,45 @@ impl ScanOption {
             request_method: String::new(),
             data_provider: String::new(),
             save_file_path: String::new(),
+        }
+    }
+    pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8) {
+        match v.parse::<IpAddr>(){
+            Ok(addr) => {
+                match addr {
+                    IpAddr::V4(ipv4_addr) => {
+                        let net: Ipv4Net = Ipv4Net::new(ipv4_addr, prefix_len).unwrap();
+                        let nw_addr = Ipv4Net::new(net.network(), prefix_len).unwrap();
+                        let hosts: Vec<Ipv4Addr> = nw_addr.hosts().collect();
+                        for host in hosts {
+                            self.targets.push(TargetInfo::new_with_ip_addr(IpAddr::V4(host)));
+                        }
+                    },
+                    IpAddr::V6(_) => {},
+                }
+            },
+            Err(_) =>{},
+        }
+        //TODO: add v6 support
+    }
+    pub fn set_dst_hosts_from_list(&mut self, v: String) {
+        let data = read_to_string(v);
+        let text = match data {
+            Ok(content) => content,
+            Err(_) => String::new(),
+        };
+        let host_list: Vec<&str> = text.trim().split("\n").collect();
+        for host in host_list {
+            match host.parse::<IpAddr>(){
+                Ok(addr) =>{
+                    self.targets.push(TargetInfo::new_with_ip_addr(addr));
+                },
+                Err(_) =>{
+                    if let Some(addr) = network::lookup_host_name(host.to_string()) {
+                        self.targets.push(TargetInfo::new_with_ip_addr(addr));
+                    }
+                },
+            }
         }
     }
 }
