@@ -83,7 +83,7 @@ impl ScanOption {
     pub fn new() -> ScanOption {
         ScanOption{
             exec_type: CommandType::PortScan,
-            interface_index: u16::MIN,
+            interface_index: u32::MIN,
             interface_name: String::new(),
             src_ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
             src_port: u16::MIN,
