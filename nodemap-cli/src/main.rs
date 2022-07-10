@@ -234,6 +234,7 @@ fn show_app_desc() {
     println!("{} {} ({}) {}", crate_name!(), crate_version!(), define::CRATE_UPDATE_DATE, sys::get_os_type());
     println!("{}", crate_description!());
     println!("{}", crate_authors!());
+    println!("{}", define::CRATE_REPOSITORY);
     println!();
     println!("'{} --help' for more information.", crate_name!());
     println!();
