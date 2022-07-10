@@ -2,6 +2,7 @@
 name = "nodemap"
 version = "0.1.0"
 edition = "2021"
+authors = ["shellrow <shellrow@protonmail.com>"]
 description = "Cross-platform network mapper"
 repository = "https://github.com/shellrow/nodemap"
 readme = "README.md"
