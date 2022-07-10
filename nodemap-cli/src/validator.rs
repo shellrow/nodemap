@@ -34,7 +34,7 @@ pub fn validate_port_opt(v: &str) -> Result<(), String> {
     }
 }
 
-pub fn validate_network_opt(v: &str) -> Result<(), String> {
+/* pub fn validate_network_opt(v: &str) -> Result<(), String> {
     let addr = IpAddr::from_str(&v);
     match addr {
         Ok(_) => {
@@ -44,7 +44,7 @@ pub fn validate_network_opt(v: &str) -> Result<(), String> {
             return Err(String::from("Please specify ip address"));
         }
     }
-}
+} */
 
 pub fn validate_host_opt(v: &str) -> Result<(), String> {
     let re_host = Regex::new(r"[\w\-._]+\.[A-Za-z]+").unwrap();
