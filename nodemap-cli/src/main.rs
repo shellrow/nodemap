@@ -4,6 +4,8 @@ extern crate clap;
 mod define;
 mod validator;
 mod parser;
+mod model;
+mod db;
 
 use std::env;
 use chrono::{Local, DateTime};
@@ -20,7 +22,7 @@ fn main() {
     let app = get_app_settings();
     let matches = app.get_matches();
     let opt: option::ScanOption = parser::parse_args(matches);
-    match opt.exec_type {
+    match opt.command_type {
         option::CommandType::PortScan => {
             match opt.port_scan_type {
                 netscan::setting::ScanType::TcpSynScan => {

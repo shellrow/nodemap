@@ -172,7 +172,6 @@ pub fn validate_ttl(v: &str) -> Result<(), String> {
     }
 }
 
-#[allow(dead_code)]
 pub fn is_ipaddr(host: String) -> bool {
     let ipaddr = IpAddr::from_str(&host);
     match ipaddr {
