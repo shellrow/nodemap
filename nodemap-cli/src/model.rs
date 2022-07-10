@@ -59,3 +59,34 @@ pub struct OsTtl {
     pub initial_ttl: u8,
     pub description: String,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct SynFingerprint {
+    pub tcp_window_size: u16,
+    pub tcp_options: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EcnFingerprint {
+    pub tcp_ecn_support: bool,
+    pub ip_df: bool,
+    pub tcp_window_size: u16,
+    pub tcp_options: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct OsClass {
+    pub vendor: String,
+    pub family: String,
+    pub generation: String,
+    pub device_type: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct TCPFingerprint {
+    pub cpe: String,
+    pub os_name: String,
+    pub class: OsClass,
+    pub syn_fingerprints: Vec<SynFingerprint>,
+    pub ecn_fingerprint: EcnFingerprint,
+}

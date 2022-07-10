@@ -4,7 +4,7 @@ use crate::model::{OSFingerprint, OuiData, PortData, OsTtl};
 
 pub fn get_oui_map() -> HashMap<String, String> {
     let mut oui_map: HashMap<String, String> = HashMap::new();
-    let rs_nscan_oui: Vec<OuiData> = serde_json::from_str(define::NSCAN_OUI).unwrap_or(vec![]);
+    let rs_nscan_oui: Vec<OuiData> = serde_json::from_str(define::NODEMAP_OUI).unwrap_or(vec![]);
     for oui in rs_nscan_oui {
         oui_map.insert(oui.mac_prefix, oui.vendor_name_detail);
     }
@@ -13,7 +13,7 @@ pub fn get_oui_map() -> HashMap<String, String> {
 
 pub fn get_tcp_map() -> HashMap<String, String> {
     let mut tcp_map: HashMap<String, String> = HashMap::new();
-    let rs_nscan_tcp_port: Vec<PortData> = serde_json::from_str(define::NSCAN_TCP_PORT).unwrap_or(vec![]);
+    let rs_nscan_tcp_port: Vec<PortData> = serde_json::from_str(define::NODEMAP_TCP_PORT).unwrap_or(vec![]);
     for port in rs_nscan_tcp_port {
         tcp_map.insert(port.port_number.to_string(), port.service_name);
     }
@@ -21,7 +21,7 @@ pub fn get_tcp_map() -> HashMap<String, String> {
 }
 
 pub fn get_default_ports() -> Vec<u16> {
-    let rs_nscan_default_ports: Vec<&str> = define::NSCAN_DEFAULT_PORTS.trim().split("\n").collect();
+    let rs_nscan_default_ports: Vec<&str> = define::NODEMAP_DEFAULT_PORTS.trim().split("\n").collect();
     let mut default_ports: Vec<u16> = vec![];
     for r in rs_nscan_default_ports {
         match r.trim_end().parse::<u16>() {
@@ -35,7 +35,7 @@ pub fn get_default_ports() -> Vec<u16> {
 }
 
 pub fn get_http_ports() -> Vec<u16> {
-    let rs_nscan_http_ports: Vec<&str> = define::NSCAN_HTTP.trim().split("\n").collect();
+    let rs_nscan_http_ports: Vec<&str> = define::NODEMAP_HTTP.trim().split("\n").collect();
     let mut http_ports: Vec<u16> = vec![];
     for r in rs_nscan_http_ports {
         match r.trim_end().parse::<u16>() {
@@ -49,7 +49,7 @@ pub fn get_http_ports() -> Vec<u16> {
 }
 
 pub fn get_https_ports() -> Vec<u16> {
-    let rs_nscan_https_ports: Vec<&str> = define::NSCAN_HTTPS.trim().split("\n").collect();
+    let rs_nscan_https_ports: Vec<&str> = define::NODEMAP_HTTPS.trim().split("\n").collect();
     let mut https_ports: Vec<u16> = vec![];
     for r in rs_nscan_https_ports {
         match r.trim_end().parse::<u16>() {
@@ -63,7 +63,7 @@ pub fn get_https_ports() -> Vec<u16> {
 }
 
 pub fn get_os_fingerprints() -> Vec<OSFingerprint> {
-    let fingerprints: Vec<OSFingerprint> = serde_json::from_str(define::NSCAN_OS).unwrap_or(vec![]);    
+    let fingerprints: Vec<OSFingerprint> = serde_json::from_str(define::NODEMAP_OS).unwrap_or(vec![]);    
     fingerprints
 }
 
