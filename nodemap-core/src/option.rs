@@ -40,6 +40,25 @@ impl CommandType {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Protocol {
+    TCP,
+    UDP,
+    ICMPv4,
+    ICMPv6,
+}
+
+impl Protocol {
+    pub fn name(&self) -> String {
+        match *self {
+            Protocol::TCP => String::from("TCP"),
+            Protocol::UDP => String::from("UDP"),
+            Protocol::ICMPv4 => String::from("ICMPv4"),
+            Protocol::ICMPv6 => String::from("ICMPv6"),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct TargetInfo {
     pub ip_addr: IpAddr,
@@ -57,7 +76,7 @@ pub struct ScanOption {
     pub src_ip: IpAddr,
     pub src_port: u16,
     pub targets: Vec<TargetInfo>,
-    pub protocol: String,
+    pub protocol: Protocol,
     pub max_hop: u8,
     pub host_scan_type: netscan::setting::ScanType,
     pub port_scan_type: netscan::setting::ScanType,
@@ -88,7 +107,7 @@ impl ScanOption {
             src_ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
             src_port: u16::MIN,
             targets: vec![],
-            protocol: String::new(),
+            protocol: Protocol::TCP,
             max_hop: 64,
             host_scan_type: netscan::setting::ScanType::IcmpPingScan,
             port_scan_type: netscan::setting::ScanType::TcpConnectScan,
