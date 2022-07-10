@@ -14,7 +14,8 @@ license = "MIT"
 name = "nodemap"
 
 [dependencies]
-nodemap-core = { path = "../nodemap-core", version = "0.1.0", default-features = false}
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 default-net = "0.11.0"
 netscan = { version = "0.12.0", default-features = false }
 clap = { version = "3.1", features = ["cargo"] }
@@ -24,3 +25,4 @@ async-io = "1.6"
 chrono = "0.4"
 regex = "1.6.0"
 dns-lookup = "1.0"
+nodemap-core = { path = "../nodemap-core", version = "0.1.0", default-features = false}
