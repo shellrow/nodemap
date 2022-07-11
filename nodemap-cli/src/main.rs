@@ -6,6 +6,7 @@ mod validator;
 mod parser;
 mod model;
 mod db;
+mod handler;
 
 use std::env;
 use chrono::{Local, DateTime};
@@ -22,18 +23,22 @@ fn main() {
     let app = get_app_settings();
     let matches = app.get_matches();
     let opt: option::ScanOption = parser::parse_args(matches);
+    show_banner_with_starttime();
     match opt.command_type {
         option::CommandType::PortScan => {
             match opt.port_scan_type {
                 netscan::setting::ScanType::TcpSynScan => {
-                    if !process::privileged() {
-                        
+                    if process::privileged() {
+                        handler::handle_port_scan(opt);
+                    }else{
+                        exit_with_error_message("Requires administrator privilege");
                     }
+                },
+                netscan::setting::ScanType::TcpConnectScan => {
+                    handler::handle_port_scan(opt);
                 },
                 _ => {},
             }
-            
-
         },
         option::CommandType::HostScan => {
             
@@ -44,10 +49,10 @@ fn main() {
         option::CommandType::Traceroute => {
             
         },
-        option::CommandType::UriScan => {
+        option::CommandType::DomainScan => {
             
         },
-        option::CommandType::DomainScan => {
+        option::CommandType::UriScan => {
             
         },
         option::CommandType::BatchScan => {
@@ -57,8 +62,6 @@ fn main() {
             
         },
     }
-    show_banner_with_starttime();
-    exit_with_error_message("test");
 }
 
 fn get_app_settings<'a>() -> Command<'a> {
