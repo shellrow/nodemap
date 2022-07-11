@@ -1,12 +1,14 @@
 use std::net::IpAddr;
 use std::str::FromStr;
 use clap::ArgMatches;
+use netscan::setting::ScanType;
 use nodemap_core::option;
 use nodemap_core::network;
 use nodemap_core::option::TargetInfo;
 use super::define;
 use super::validator;
 use super::db;
+use super::process;
 
 fn get_default_option() -> option::ScanOption {
     let mut opt = option::ScanOption::new();
@@ -24,6 +26,11 @@ fn get_default_option() -> option::ScanOption {
             }
         },
         Err(_) => {},
+    }
+    if process::privileged() {
+        opt.port_scan_type = ScanType::TcpSynScan;
+    }else{
+        opt.port_scan_type = ScanType::TcpConnectScan;
     }
     opt
 }
@@ -144,15 +151,15 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
                 Err(_) => {},
             }
         },
-        Some(("uri", sub_m)) => {
-            opt.command_type = option::CommandType::UriScan;
-            let base_uri: &str = sub_m.value_of("base_uri").unwrap();
-            opt.targets.push(TargetInfo::new_with_base_uri(base_uri.to_string()));
-        },
         Some(("domain", sub_m)) => {
             opt.command_type = option::CommandType::DomainScan;
             let base_domain: &str = sub_m.value_of("base_domain").unwrap();
             opt.targets.push(TargetInfo::new_with_base_domain(base_domain.to_string()));
+        },
+        Some(("uri", sub_m)) => {
+            opt.command_type = option::CommandType::UriScan;
+            let base_uri: &str = sub_m.value_of("base_uri").unwrap();
+            opt.targets.push(TargetInfo::new_with_base_uri(base_uri.to_string()));
         },
         Some(("batch", _sub_m)) => {
             opt.command_type = option::CommandType::BatchScan;
