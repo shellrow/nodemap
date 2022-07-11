@@ -19,7 +19,7 @@ use crate::option::TargetInfo;
 
 use super::option::ScanOption;
 
-pub fn run_port_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> PortScanResult {
+pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
     let mut port_scanner = match PortScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -44,7 +44,7 @@ pub fn run_port_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> PortScanR
     result
 }
 
-pub async fn run_async_port_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> PortScanResult {
+pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
     let mut port_scanner = match AsyncPortScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -71,7 +71,7 @@ pub async fn run_async_port_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) 
     result
 }
 
-pub fn run_host_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> HostScanResult {
+pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScanResult {
     let mut host_scanner = match HostScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -125,7 +125,7 @@ pub async fn run_async_host_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) 
     result
 }
 
-pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: mpsc::Sender<String>) -> HashMap<IpAddr, HashMap<u16, String>> {
+pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: &mpsc::Sender<String>) -> HashMap<IpAddr, HashMap<u16, String>> {
     let mut map: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
     for target in targets {
         let mut service_detector = ServiceDetector::new();
@@ -141,7 +141,7 @@ pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: mpsc::Sender<Stri
     map
 }
 
-pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx: mpsc::Sender<String>) -> Vec<ProbeResult> {
+pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx: &mpsc::Sender<String>) -> Vec<ProbeResult> {
     let mut fingerprinter = Fingerprinter::new(opt.src_ip).unwrap();
     fingerprinter.set_wait_time(opt.wait_time);
     for target in targets {
@@ -161,7 +161,7 @@ pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx:
     results
 }
 
-pub fn run_ping(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> PingResult {
+pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingResult {
     let pinger: Pinger = Pinger::new(opt.targets[0].ip_addr).unwrap();
     let rx = pinger.get_progress_receiver();
     let handle = thread::spawn(move|| {
@@ -177,7 +177,7 @@ pub fn run_ping(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> PingResult {
     result
 }
 
-pub fn run_traceroute(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> TraceResult {
+pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceResult {
     let tracer: Tracer = Tracer::new(opt.targets[0].ip_addr).unwrap();
     let rx = tracer.get_progress_receiver();
     let handle = thread::spawn(move|| {
@@ -193,7 +193,7 @@ pub fn run_traceroute(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> TraceRes
     result
 }
 
-pub async fn run_uri_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> UriScanResult {
+pub async fn run_uri_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> UriScanResult {
     let mut uri_scanner = match UriScanner::new(){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -244,7 +244,7 @@ pub async fn run_uri_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> UriS
     result
 }
 
-pub fn run_domain_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> DomainScanResult {
+pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> DomainScanResult {
     let mut domain_scanner = match DomainScanner::new(){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
