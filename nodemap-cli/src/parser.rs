@@ -31,6 +31,7 @@ fn get_default_option() -> option::ScanOption {
         opt.port_scan_type = ScanType::TcpSynScan;
     }else{
         opt.port_scan_type = ScanType::TcpConnectScan;
+        opt.async_scan = true;
     }
     opt
 }

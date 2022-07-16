@@ -1,3 +1,5 @@
+use std::vec;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -74,12 +76,34 @@ pub struct EcnFingerprint {
     pub tcp_options: Vec<String>,
 }
 
+impl EcnFingerprint {
+    pub fn new() -> EcnFingerprint {
+        EcnFingerprint {
+            tcp_ecn_support: false,
+            ip_df: false,
+            tcp_window_size: 0,
+            tcp_options: vec![],
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct OsClass {
     pub vendor: String,
     pub family: String,
     pub generation: String,
     pub device_type: String,
+}
+
+impl OsClass {
+    pub fn new() -> OsClass {
+        OsClass {
+            vendor: String::new(),
+            family: String::new(),
+            generation: String::new(),
+            device_type: String::new(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -89,4 +113,16 @@ pub struct TCPFingerprint {
     pub class: OsClass,
     pub syn_fingerprints: Vec<SynFingerprint>,
     pub ecn_fingerprint: EcnFingerprint,
+}
+
+impl TCPFingerprint {
+    pub fn new() -> TCPFingerprint {
+        TCPFingerprint {
+            cpe: String::new(),
+            os_name: String::new(),
+            class: OsClass::new(),
+            syn_fingerprints: vec![],
+            ecn_fingerprint: EcnFingerprint::new(),
+        }
+    }
 }

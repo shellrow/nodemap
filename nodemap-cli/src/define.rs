@@ -9,4 +9,4 @@ pub const NODEMAP_HTTPS: &str = include_str!("../data/nodemap-https.txt");
 pub const NODEMAP_OS: &str = include_str!("../data/nodemap-os-simple.json");
 pub const NODEMAP_OSDB: &str = include_str!("../data/nodemap-osdb.json");
 #[allow(dead_code)]
-pub const NSCAN_OS_TTL: &str = include_str!("../data/nodemap-os-ttl.json");
+pub const NODEMAP_OS_TTL: &str = include_str!("../data/nodemap-os-ttl.json");

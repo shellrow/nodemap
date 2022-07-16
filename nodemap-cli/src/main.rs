@@ -6,6 +6,7 @@ mod validator;
 mod parser;
 mod model;
 mod db;
+mod os;
 mod handler;
 
 use std::env;
@@ -29,13 +30,17 @@ fn main() {
             match opt.port_scan_type {
                 netscan::setting::ScanType::TcpSynScan => {
                     if process::privileged() {
-                        handler::handle_port_scan(opt);
+                        async_io::block_on(async {
+                            handler::handle_port_scan(opt).await;
+                        })
                     }else{
                         exit_with_error_message("Requires administrator privilege");
                     }
                 },
                 netscan::setting::ScanType::TcpConnectScan => {
-                    handler::handle_port_scan(opt);
+                    async_io::block_on(async {
+                        handler::handle_port_scan(opt).await;
+                    })
                 },
                 _ => {},
             }
