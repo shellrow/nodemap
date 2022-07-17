@@ -3,13 +3,17 @@ use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use std::collections::HashMap;
 use std::net::IpAddr;
+use std::time::{Duration, Instant};
 use netscan::os::ProbeResult;
 use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult, ScanStatus};
 use nodemap_core::option::TargetInfo;
 use nodemap_core::{option, scan, result};
 use console::{Term, Style, Emoji};
 use indicatif::{ProgressBar, ProgressStyle, ProgressFinish};
+use crate::model::TCPFingerprint;
+
 use super::os;
+use super::db;
 
 fn get_spinner() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
@@ -34,6 +38,7 @@ fn get_spinner() -> ProgressBar {
 }
 
 pub async fn handle_port_scan(opt: option::ScanOption) {
+    let mut result: result::PortScanResult = result::PortScanResult::new();
     //let term = Term::stdout();
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
     // Port Scan
@@ -75,6 +80,7 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
 
     // Service Detection
     let mut sd_result: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
+    let mut sd_time: Duration = Duration::from_millis(0);
     if ps_result.result_map.keys().len() > 0 {
         let mut sd_targets: Vec<TargetInfo> = vec![];
         let ip = ps_result.result_map.keys().last().unwrap().clone();
@@ -84,6 +90,7 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
         let pb = get_spinner();
         pb.set_message("Detecting services ...");
+        let start_time: Instant = Instant::now();
         let handle = thread::spawn(move || {
             scan::run_service_detection(sd_targets, &msg_tx)
         });
@@ -92,11 +99,13 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         }
         pb.finish_and_clear();
         sd_result = handle.join().unwrap();
+        sd_time = Instant::now().duration_since(start_time);
         println!("Service detection ... {} {}",Emoji::new("✅", ""),Style::new().green().apply_to("Done"));
     }
 
     // OS Detection
     let mut od_result: Vec<ProbeResult> = vec![];
+    let mut od_time: Duration = Duration::from_millis(0);
     if ps_result.result_map.keys().len() > 0 {
         let ip = ps_result.result_map.keys().last().unwrap().clone();
         let mut od_targets: Vec<TargetInfo> = vec![];
@@ -106,6 +115,7 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
         let pb = get_spinner();
         pb.set_message("Detecting os ...");
+        let start_time: Instant = Instant::now();
         let handle = thread::spawn(move || {
             scan::run_os_fingerprinting(opt,  od_targets, &msg_tx)
         });
@@ -114,27 +124,45 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         }
         pb.finish_and_clear();
         od_result = handle.join().unwrap();
+        od_time = Instant::now().duration_since(start_time);
         println!("OS detection ... {} {}",Emoji::new("✅", ""),Style::new().green().apply_to("Done"));
     }
 
-    // Print results 
-    println!("Results:");
-    for (ip, ports) in ps_result.result_map {
-        println!("{}", ip);
+    if ps_result.result_map.keys().len() > 0 {
+        let ip = ps_result.result_map.keys().last().unwrap().clone();
+        let ports = ps_result.result_map.values().last().unwrap().clone();
+        let tcp_map = db::get_tcp_map();
+        let t_map: HashMap<u16, String> = HashMap::new();
+        let service_map = sd_result.get(&ip).unwrap_or(&t_map);
+        // PortInfo
         for port in ports {
-            println!("{:?}", port);
+            let port_info = result::PortInfo { 
+                port_number: port.port.clone(), 
+                port_status: format!("{:?}", port.status), 
+                service_name: tcp_map.get(&port.port.to_string()).unwrap_or(&String::new()).to_string(), 
+                service_version: service_map.get(&port.port).unwrap_or(&String::new()).to_string(), 
+                remark: String::new(), 
+            };     
+            result.ports.push(port_info);  
         }
+        // HostInfo
+        let tcp_fingetprint =  if od_result.len() > 0 { os::verify_fingerprints(od_result[0].tcp_fingerprint.clone()) } else{ TCPFingerprint::new() };
+        let host_info = result::HostInfo {
+            ip_addr: ip.to_string(),
+            host_name: dns_lookup::lookup_addr(&ip).unwrap_or(String::new()),
+            mac_addr: String::new(),
+            vendor_info: String::new(),
+            os_name: tcp_fingetprint.os_name ,
+            cpe: tcp_fingetprint.cpe,
+        };
+        result.host = host_info;
+        result.port_scan_time = ps_result.scan_time;
+        result.service_detection_time = sd_time;
+        result.os_detection_time = od_time;
+        result.total_scan_time = result.port_scan_time + result.service_detection_time + result.os_detection_time;
     }
-    println!("Scan Time: {:?}", ps_result.scan_time);
-
-    for r in sd_result {
-        println!("{} {:?}", r.0, r.1);
-    }
-
-    for r in od_result {
-        let f = os::verify_fingerprints(r.tcp_fingerprint);
-        println!("{} {:?}", r.ip_addr, f);
-    }
+    
+    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 
 }
 
