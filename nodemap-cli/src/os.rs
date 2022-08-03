@@ -88,7 +88,6 @@ pub fn verify_fingerprints(fingerprint: TcpFingerprint) -> TCPFingerprint {
     }
     match map.iter().max_by(|a, b| a.1.0.cmp(&b.1.0)).map(|(_k, v)| v){
         Some(v) => {
-            println!("{} {}", v.0, v.1.cpe);
             return search_latest_gen(map.clone(), v.0);
         },   
         None => {

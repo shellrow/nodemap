@@ -125,13 +125,13 @@ pub async fn run_async_host_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) 
     result
 }
 
-pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: &mpsc::Sender<String>) -> HashMap<IpAddr, HashMap<u16, String>> {
+pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: &mpsc::Sender<String>, port_db: Option<PortDatabase>) -> HashMap<IpAddr, HashMap<u16, String>> {
     let mut map: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
     for target in targets {
         let mut service_detector = ServiceDetector::new();
         service_detector.set_dst_ip(target.ip_addr);
         service_detector.set_open_ports(target.ports);
-        let service_map: HashMap<u16, String> = service_detector.detect(Some(PortDatabase::default()));
+        let service_map: HashMap<u16, String> = service_detector.detect(port_db.clone());
         map.insert(target.ip_addr, service_map);
         match msg_tx.send(target.ip_addr.to_string()) {
             Ok(_) => {},

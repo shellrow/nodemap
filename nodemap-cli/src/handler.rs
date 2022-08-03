@@ -6,12 +6,12 @@ use std::net::IpAddr;
 use std::time::{Duration, Instant};
 use netscan::os::ProbeResult;
 use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult, ScanStatus};
+use netscan::service::PortDatabase;
 use nodemap_core::option::TargetInfo;
 use nodemap_core::{option, scan, result};
 use console::{Term, Style, Emoji};
 use indicatif::{ProgressBar, ProgressStyle, ProgressFinish};
 use crate::model::TCPFingerprint;
-
 use super::os;
 use super::db;
 
@@ -51,16 +51,12 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         }else{
             scan::run_port_scan(p_opt, &msg_tx)
         }
-        //scan::run_port_scan(opt, &msg_tx)
     });
 
     let pb = get_spinner();
     pb.set_message("Scanning ports ...");
-    // Print progress
-    //term.set_title("Progress...");
     while let Ok(_msg) = msg_rx.recv() {
-        //term.write_line(&format!("from Scanner: {}", msg)).unwrap();
-        //term.move_cursor_up(1).unwrap();
+
     }
     let ps_result: NsPortScanResult = handle.join().unwrap();
 
@@ -87,12 +83,13 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
         let mut target: TargetInfo  = TargetInfo::new_with_ip_addr(ip);
         target.ports = ps_result.get_open_ports(ip);
         sd_targets.push(target);
+        let port_db: PortDatabase = PortDatabase { http_ports: db::get_http_ports(), https_ports: db::get_https_ports() };
         let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
         let pb = get_spinner();
         pb.set_message("Detecting services ...");
         let start_time: Instant = Instant::now();
         let handle = thread::spawn(move || {
-            scan::run_service_detection(sd_targets, &msg_tx)
+            scan::run_service_detection(sd_targets, &msg_tx, Some(port_db))
         });
         while let Ok(_msg) = msg_rx.recv() {
             
