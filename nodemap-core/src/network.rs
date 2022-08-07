@@ -149,3 +149,17 @@ pub fn get_interface_by_ip(ip_addr: IpAddr) -> Option<default_net::Interface> {
     }
     return None;
 }
+
+pub fn get_interface_by_name(if_name: String) -> Option<default_net::Interface> {
+    for iface in default_net::get_interfaces() {
+        if iface.name == if_name {
+            return Some(iface);
+        }
+        if let Some(friendly_name) = &iface.friendly_name {
+            if friendly_name == &if_name {
+                return Some(iface);
+            }
+        }
+    }
+    return None;
+}

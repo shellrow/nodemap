@@ -70,14 +70,14 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
             println!("Port scan ... {} {}", Emoji::new("⌛", ""),Style::new().yellow().apply_to("Timedout"));
         },
         _ => {
-            println!("Port scan ... {} {}", Emoji::new("❌", ""),Style::new().green().apply_to("Done"));
+            println!("Port scan ... {} {}", Emoji::new("❌", ""),Style::new().green().apply_to("Error"));
         },
     }
 
     // Service Detection
     let mut sd_result: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
     let mut sd_time: Duration = Duration::from_millis(0);
-    if ps_result.result_map.keys().len() > 0 {
+    if opt.service_detection && ps_result.result_map.keys().len() > 0 {
         let mut sd_targets: Vec<TargetInfo> = vec![];
         let ip = ps_result.result_map.keys().last().unwrap().clone();
         let mut target: TargetInfo  = TargetInfo::new_with_ip_addr(ip);
@@ -103,7 +103,7 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
     // OS Detection
     let mut od_result: Vec<ProbeResult> = vec![];
     let mut od_time: Duration = Duration::from_millis(0);
-    if ps_result.result_map.keys().len() > 0 {
+    if opt.os_detection && ps_result.result_map.keys().len() > 0 {
         let ip = ps_result.result_map.keys().last().unwrap().clone();
         let mut od_targets: Vec<TargetInfo> = vec![];
         let mut target: TargetInfo  = TargetInfo::new_with_ip_addr(ip);
