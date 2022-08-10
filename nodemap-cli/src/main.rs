@@ -9,9 +9,9 @@ mod db;
 mod os;
 mod handler;
 
-use std::env;
+use std::{env, process::exit};
 use chrono::{Local, DateTime};
-use clap::{Command, AppSettings, Arg, App};
+use clap::{Command, AppSettings, Arg, App, ArgGroup};
 
 use nodemap_core::{option, process, sys};
 
@@ -46,7 +46,22 @@ fn main() {
             }
         },
         option::CommandType::HostScan => {
-            
+            match opt.protocol {
+                option::Protocol::ICMPv4 | option::Protocol::ICMPv6 => {
+                    if process::privileged() {
+                        async_io::block_on(async {
+                            handler::handle_host_scan(opt).await;
+                        })
+                    }else{
+                        exit_with_error_message("Requires administrator privilege");
+                    }
+                },
+                _ => {
+                    async_io::block_on(async {
+                        handler::handle_host_scan(opt).await;
+                    })
+                },
+            }
         },
         option::CommandType::Ping => {
             
@@ -71,59 +86,80 @@ fn main() {
 
 fn get_app_settings<'a>() -> Command<'a> {
     // SubCommand
-    let sc_port: App = App::new("port")
-        .about("Scan ports of the specified host. \nUse default port list if port range omitted. \nExamples: \nport 192.168.1.8 -S -O \nport 192.168.1.8:1-1000 \nport 192.168.1.8:22,80,8080 \nport 192.168.1.8 -l custom-list.txt")
-        .arg(Arg::new("target")
-        .required(true)
-        .validator(validator::validate_port_opt));
-    let sc_host: App = App::new("host")
-        .about("Scan hosts in specified network or host-list. \nExamples: \nhost 192.168.1.0 \nhost custom-list.txt \nhost 192.168.1.10,192.168.1.20,192.168.1.30")
-        .arg(Arg::new("target")
-        .required(true)
-        .validator(validator::validate_host_opt));
-    let sc_ping: App = App::new("ping")
-        .about("Ping to specified host. \nExamples: \nping 192.168.1.8 -c 4")
-        .arg(Arg::new("target")
-        .required(true)
-        .validator(validator::validate_host_opt));
-    let sc_trace: App = App::new("trace")
-        .about("Traceroute to specified host. \nExamples: \ntrace 192.168.1.8")
-        .arg(Arg::new("target")
-        .required(true)
-        .validator(validator::validate_host_opt));
-    let sc_uri: App = App::new("uri")
-        .about("URI scan. \nExamples: \nuri https://example.com/")
-        .arg(Arg::new("base_uri")
-        .required(true)
-        .validator(validator::validate_uri_opt));
-    let sc_domain: App = App::new("domain")
-        .about("Domain scan. \nExamples: \ndomain example.com")
-        .arg(Arg::new("base_domain")
-        .required(true)
-        .validator(validator::validate_domain_opt));
-    let sc_batch: App = App::new("batch")
+    /* let sc_batch: App = App::new("batch")
         .about("Batch scan with config. \nExamples: \nbatch <path_to_config_file>")
         .arg(Arg::new("config")
         .required(true)
-        .validator(validator::validate_filepath));
-    let sc_passive: App = App::new("passive")
-        .about("Passive scan. \nExamples: \npassive shodan")
-        .arg(Arg::new("target")
-        .required(true)
-        .validator(validator::validate_domain_opt));
+        .validator(validator::validate_filepath)); */
 
     let app: App = Command::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
         .about(crate_description!())
-        .subcommand(sc_port)
-        .subcommand(sc_host)
-        .subcommand(sc_ping)
-        .subcommand(sc_trace)
-        .subcommand(sc_uri)
-        .subcommand(sc_domain)
-        .subcommand(sc_batch)
-        .subcommand(sc_passive)
+        // .subcommand(sc_batch)
+        .arg(Arg::new("port")
+            .help("Scan ports of the specified host. \nUse default port list if port range omitted. \nExamples: \n--port 192.168.1.8 -S -O \n--port 192.168.1.8:1-1000 \n--port 192.168.1.8:22,80,8080 \n--port 192.168.1.8 -l custom-list.txt")
+            .short('p')
+            .long("port")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_port_opt)
+        )
+        .arg(Arg::new("host")
+            .help("Scan hosts in specified network or host-list. \nExamples: \n--host 192.168.1.0 \n--host custom-list.txt \n--host 192.168.1.10,192.168.1.20,192.168.1.30")
+            .short('n')
+            .long("host")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_host_opt)
+        )
+        .arg(Arg::new("ping")
+            .help("Ping to specified host. \nExamples: \n--ping 192.168.1.8 -c 4")
+            .short('g')
+            .long("ping")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_host_opt)
+        )
+        .arg(Arg::new("trace")
+            .help("Traceroute to specified host. \nExamples: \n--trace 192.168.1.8")
+            .short('e')
+            .long("trace")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_host_opt)
+        )
+        .arg(Arg::new("uri")
+            .help("URI scan. \nExamples: \n--uri https://example.com/")
+            .short('u')
+            .long("uri")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_uri_opt)
+        )
+        .arg(Arg::new("domain")
+            .help("Domain scan. \nExamples: \n--domain example.com")
+            .short('d')
+            .long("domain")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_domain_opt)
+        )
+        .arg(Arg::new("batch")
+            .help("Batch scan with config. \nExamples: \n--batch <path_to_config_file>")
+            .short('b')
+            .long("batch")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_filepath)
+        )
+        .arg(Arg::new("passive")
+            .help("Passive scan. \nExamples: \n--passive shodan")
+            .long("passive")
+            .takes_value(true)
+            .value_name("target")
+            .validator(validator::validate_domain_opt)
+        )
         .arg(Arg::new("interface")
             .help("Specify the network interface")
             .short('i')
@@ -142,7 +178,7 @@ fn get_app_settings<'a>() -> Command<'a> {
         )
         .arg(Arg::new("protocol")
             .help("Specify the protocol")
-            .short('p')
+            .short('P')
             .long("protocol")
             .takes_value(true)
             .value_name("protocol")
@@ -230,14 +266,6 @@ fn get_app_settings<'a>() -> Command<'a> {
             .value_name("file_path")
             .validator(validator::validate_filepath)
         )
-        .arg(Arg::new("datasource")
-            .help("Specify the datasource")
-            .short('d')
-            .long("datasource")
-            .takes_value(false)
-            .value_name("datasource_name")
-            .validator(validator::validate_domain_opt)
-        )
         .arg(Arg::new("save")
             .help("Save scan result in json format - Ex: -o result.json")
             .short('o')
@@ -250,7 +278,7 @@ fn get_app_settings<'a>() -> Command<'a> {
             .long("acceptinvalidcerts")
             .takes_value(false)
         )
-        //.group(ArgGroup::new("mode").args(&["network", "host", "ping", "trace", "uri", "domain"]))
+        .group(ArgGroup::new("mode").args(&["port", "host", "ping", "trace", "uri", "domain", "batch", "passive"]))
         .setting(AppSettings::DeriveDisplayOrder)
         ;
         app

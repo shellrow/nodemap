@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::net::IpAddr;
 use std::time::{Duration, Instant};
 use netscan::os::ProbeResult;
-use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult, ScanStatus};
+use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult as NsHostScanResult, ScanStatus};
 use netscan::service::PortDatabase;
 use nodemap_core::option::TargetInfo;
 use nodemap_core::{option, scan, result};
@@ -163,7 +163,54 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
 
 }
 
-pub fn handle_host_scan(opt: option::ScanOption) {
+pub async fn handle_host_scan(opt: option::ScanOption) {
+    let mut result: result::HostScanResult = result::HostScanResult::new();
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let h_opt = opt.clone();
+    let handle = thread::spawn(move|| {
+        if h_opt.async_scan {
+            async_io::block_on(async {
+                scan::run_async_host_scan(h_opt, &msg_tx).await
+            })
+        }else{
+            scan::run_host_scan(h_opt, &msg_tx)
+        }
+    });
+
+    let pb = get_spinner();
+    pb.set_message("Scanning hosts ...");
+    while let Ok(_msg) = msg_rx.recv() {
+
+    }
+    let hs_result: NsHostScanResult = handle.join().unwrap();
+
+    pb.finish_and_clear();
+
+    match hs_result.scan_status {
+        ScanStatus::Done => {
+            println!("Host scan ... {} {}",Emoji::new("✅", ""),Style::new().green().apply_to("Done"));
+        },
+        ScanStatus::Timeout => {
+            println!("Host scan ... {} {}", Emoji::new("⌛", ""),Style::new().yellow().apply_to("Timedout"));
+        },
+        _ => {
+            println!("Host scan ... {} {}", Emoji::new("❌", ""),Style::new().green().apply_to("Error"));
+        },
+    }
+
+    for host in hs_result.hosts{
+        let host_info = result::HostInfo {
+            ip_addr: host.ip_addr.to_string(),
+            host_name: dns_lookup::lookup_addr(&host.ip_addr).unwrap_or(String::new()),
+            mac_addr: String::new(),
+            vendor_info: String::new(),
+            os_name: String::new(),
+            cpe: String::new(),
+        };
+        result.hosts.push(host_info);
+    }
+
+    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 
 }
 

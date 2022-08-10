@@ -97,7 +97,7 @@ pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScan
     result
 }
 
-pub async fn run_async_host_scan(opt: ScanOption, msg_tx: mpsc::Sender<String>) -> HostScanResult {
+pub async fn run_async_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScanResult {
     let mut host_scanner = match AsyncHostScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
