@@ -80,6 +80,7 @@ pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScan
         let dst: Destination = Destination::new(target.ip_addr, target.ports);
         host_scanner.add_destination(dst);
     }
+    host_scanner.set_scan_type(opt.host_scan_type);
     host_scanner.set_timeout(opt.timeout);
     host_scanner.set_wait_time(opt.wait_time);
     host_scanner.set_send_rate(opt.send_rate);
@@ -106,6 +107,7 @@ pub async fn run_async_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>)
         let dst: Destination = Destination::new(target.ip_addr, target.ports);
         host_scanner.add_destination(dst);
     }
+    host_scanner.set_scan_type(opt.host_scan_type);
     host_scanner.set_timeout(opt.timeout);
     host_scanner.set_wait_time(opt.wait_time);
     host_scanner.set_send_rate(opt.send_rate);

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
 use std::str::FromStr;
 use ipnet::{Ipv4Net, Ipv6Net};
@@ -79,6 +80,27 @@ pub fn get_mac_through_arp(interface: &pnet_datalink::NetworkInterface, target_i
         }
     }
     return target_mac_addr;
+}
+
+pub fn get_mac_addresses(ips: Vec<IpAddr>, src_ip: IpAddr) -> HashMap<IpAddr, String> {
+    let mut map : HashMap<IpAddr, String> = HashMap::new();
+    if let Some(c_interface) = get_interface_by_ip(src_ip) {
+        let interfaces = pnet_datalink::interfaces();
+        let iface = interfaces.into_iter().filter(|interface: &pnet_datalink::NetworkInterface| interface.index == c_interface.index).next().expect("Failed to get Interface");
+        for ip in ips {
+            if !is_global_addr(ip) && in_same_network(src_ip.to_string(), ip.to_string()) {
+                let mac_addr = get_mac_through_arp(&iface, ip.to_string().parse::<Ipv4Addr>().unwrap()).to_string();
+                map.insert(ip, mac_addr);
+                /* if mac_addr.len() > 16 {
+                    let prefix8 = mac_addr[0..8].to_uppercase();
+                    vendor_map.insert(ip.to_string(), (mac_addr, oui_map.get(&prefix8).unwrap_or(&String::from("Unknown")).to_string()));
+                }else{
+                    vendor_map.insert(ip.to_string(), (mac_addr, String::from("Unknown")));
+                } */
+            }
+        }
+    }
+    map
 }
 
 pub fn is_global_addr(ip_addr: IpAddr) -> bool {

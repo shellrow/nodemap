@@ -1,8 +1,8 @@
 use std::time::Duration;
-use std::net::{IpAddr, Ipv4Addr};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::fs::read_to_string;
 use ipnet::Ipv4Net;
-
+use std::str::FromStr;
 use super::network;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -87,6 +87,15 @@ impl TargetInfo {
             ip_addr: ip_addr,
             host_name: String::new(),
             ports: vec![],
+            base_uri: String::new(),
+            base_domain: String::new(),
+        }
+    }
+    pub fn new_with_socket(ip_addr: IpAddr, port: u16) -> TargetInfo {
+        TargetInfo {
+            ip_addr: ip_addr,
+            host_name: String::new(),
+            ports: vec![port],
             base_uri: String::new(),
             base_domain: String::new(),
         }
@@ -210,7 +219,7 @@ impl ScanOption {
             save_file_path: String::new(),
         }
     }
-    pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8) {
+    pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8, port: Option<u16>) {
         match v.parse::<IpAddr>(){
             Ok(addr) => {
                 match addr {
@@ -219,7 +228,11 @@ impl ScanOption {
                         let nw_addr = Ipv4Net::new(net.network(), prefix_len).unwrap();
                         let hosts: Vec<Ipv4Addr> = nw_addr.hosts().collect();
                         for host in hosts {
-                            self.targets.push(TargetInfo::new_with_ip_addr(IpAddr::V4(host)));
+                            if let Some(p) = port {
+                                self.targets.push(TargetInfo::new_with_socket(IpAddr::V4(host), p));
+                            }else{
+                                self.targets.push(TargetInfo::new_with_socket(IpAddr::V4(host), 80));
+                            }
                         }
                     },
                     IpAddr::V6(_) => {},
@@ -244,6 +257,13 @@ impl ScanOption {
                 Err(_) =>{
                     if let Some(addr) = network::lookup_host_name(host.to_string()) {
                         self.targets.push(TargetInfo::new_with_ip_addr(addr));
+                    }else{
+                        match  SocketAddr::from_str(host) {
+                            Ok(sock_addr) => {
+                                self.targets.push(TargetInfo::new_with_socket(sock_addr.ip(), sock_addr.port()));
+                            },
+                            Err(_) => {},
+                        }
                     }
                 },
             }
