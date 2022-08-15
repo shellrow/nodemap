@@ -1,4 +1,3 @@
-use std::hash::Hash;
 use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use std::collections::HashMap;
@@ -8,9 +7,9 @@ use netscan::os::ProbeResult;
 use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult as NsHostScanResult, ScanStatus};
 use netscan::service::PortDatabase;
 use nodemap_core::option::TargetInfo;
-use nodemap_core::{option, scan, result};
-use console::{Term, Style, Emoji};
-use indicatif::{ProgressBar, ProgressStyle, ProgressFinish};
+use nodemap_core::{option, scan, result, network};
+use console::{Style, Emoji};
+use indicatif::{ProgressBar, ProgressStyle};
 use crate::model::TCPFingerprint;
 use super::os;
 use super::db;
@@ -198,13 +197,23 @@ pub async fn handle_host_scan(opt: option::ScanOption) {
         },
     }
 
+    let oui_map = db::get_oui_map();
+    let ttl_map: HashMap<u8, String> = db::get_os_ttl();
+    let mac_map: HashMap<IpAddr, String> = network::get_mac_addresses(hs_result.get_hosts(), opt.src_ip);
     for host in hs_result.hosts{
         let host_info = result::HostInfo {
             ip_addr: host.ip_addr.to_string(),
             host_name: dns_lookup::lookup_addr(&host.ip_addr).unwrap_or(String::new()),
-            mac_addr: String::new(),
-            vendor_info: String::new(),
-            os_name: String::new(),
+            mac_addr: mac_map.get(&host.ip_addr).unwrap_or(&String::new()).to_string(),
+            vendor_info: if let Some(mac) = mac_map.get(&host.ip_addr){
+                if mac.len() > 16 {
+                    let prefix8 = mac[0..8].to_uppercase();
+                    oui_map.get(&prefix8).unwrap_or(&String::new()).to_string()
+                }else{
+                    oui_map.get(mac).unwrap_or(&String::new()).to_string()
+                }
+            }else{String::new()},
+            os_name: ttl_map.get(&host.ttl).unwrap_or(&String::new()).to_string(),
             cpe: String::new(),
         };
         result.hosts.push(host_info);

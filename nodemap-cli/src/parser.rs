@@ -1,4 +1,5 @@
 use std::net::IpAddr;
+use std::net::SocketAddr;
 use std::str::FromStr;
 use std::time::Duration;
 use clap::ArgMatches;
@@ -89,10 +90,19 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
     }else if matches.contains_id("host") {
         opt.command_type = option::CommandType::HostScan;
         opt.protocol = option::Protocol::ICMPv4;
+        opt.host_scan_type = ScanType::IcmpPingScan;
         let target: &str = matches.value_of("host").unwrap();
         let target_vec: Vec<&str> = target.split("/").collect();
-        if validator::is_ipaddr(target_vec[0].to_string()) {
-            let nw_addr: String = match network::get_network_address(target_vec[0].to_string()) {
+        if validator::is_ipaddr(target_vec[0].to_string()) || validator::is_socketaddr(target_vec[0].to_string()) {
+            let mut port :u16 = 80;
+            let ip_string = if validator::is_socketaddr(target_vec[0].to_string()) {
+                let socket_addr = SocketAddr::from_str(target_vec[0]).unwrap();
+                port = socket_addr.port();
+                socket_addr.ip().to_string()
+            }else{
+                target_vec[0].to_string()
+            };
+            let nw_addr: String = match network::get_network_address(ip_string) {
                 Ok(nw_addr) => nw_addr,
                 Err(e) => {
                     print!("{}", e);
@@ -106,9 +116,9 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
                     Ok(prefix_len) => prefix_len,
                     Err(_) => 24,
                 };
-                opt.set_dst_hosts_from_na(nw_addr, prefix_len);
+                opt.set_dst_hosts_from_na(nw_addr, prefix_len, Some(port));
             }else{
-                opt.set_dst_hosts_from_na(nw_addr, 24);
+                opt.set_dst_hosts_from_na(nw_addr, 24, Some(port));
             }
         }else{
             // list
@@ -121,11 +131,11 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
                     for ip_str in ip_vec {
                         match IpAddr::from_str(&ip_str) {
                             Ok(ip) => {
-                                opt.targets.push(TargetInfo::new_with_ip_addr(ip));
+                                opt.targets.push(TargetInfo::new_with_socket(ip, 80));
                             },
                             Err(_) => {
                                 if let Some(ip) = network::lookup_host_name(ip_str.to_string()) {
-                                    opt.targets.push(TargetInfo::new_with_ip_addr(ip));
+                                    opt.targets.push(TargetInfo::new_with_socket(ip, 80));
                                 }
                             },
                         }
@@ -192,12 +202,16 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         let v_protocol: String = matches.get_one::<String>("protocol").unwrap().to_string();
         if v_protocol == "TCP" || v_protocol == "tcp" {
             opt.protocol = Protocol::TCP;   
+            opt.host_scan_type = ScanType::TcpPingScan;
         }else if v_protocol == "UDP" || v_protocol == "udp" {
             opt.protocol = Protocol::UDP;
+            opt.host_scan_type = ScanType::UdpPingScan;
         }else if v_protocol == "ICMPv4" || v_protocol == "icmpv4" {
             opt.protocol = Protocol::ICMPv4;
+            opt.host_scan_type = ScanType::IcmpPingScan;
         }else if v_protocol == "ICMPv6" || v_protocol == "icmpv6" {
             opt.protocol = Protocol::ICMPv6;
+            opt.host_scan_type = ScanType::IcmpPingScan;
         }
     }
     if matches.contains_id("maxhop") {

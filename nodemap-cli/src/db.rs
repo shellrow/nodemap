@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use super::define;
-use crate::model::{OSFingerprint, OuiData, PortData, OsTtl, TCPFingerprint};
+use crate::model::{OuiData, PortData, OsTtl, TCPFingerprint};
 
 pub fn get_oui_map() -> HashMap<String, String> {
     let mut oui_map: HashMap<String, String> = HashMap::new();
@@ -62,21 +62,20 @@ pub fn get_https_ports() -> Vec<u16> {
     https_ports
 }
 
-pub fn get_os_fingerprints() -> Vec<OSFingerprint> {
+/* pub fn get_os_fingerprints() -> Vec<OSFingerprint> {
     let fingerprints: Vec<OSFingerprint> = serde_json::from_str(define::NODEMAP_OS).unwrap_or(vec![]);    
     fingerprints
-}
+} */
 
 pub fn get_tcp_fingerprints() -> Vec<TCPFingerprint> {
     let fingerprints: Vec<TCPFingerprint> = serde_json::from_str(define::NODEMAP_OSDB).unwrap_or(vec![]);    
     fingerprints
 }
 
-#[allow(dead_code)]
 pub fn get_os_ttl() -> HashMap<u8, String> {
     let mut ttl_map: HashMap<u8, String> = HashMap::new();
-    let rs_nscan_os_ttl: Vec<OsTtl> = serde_json::from_str(define::NODEMAP_OS_TTL).unwrap_or(vec![]);
-    for os_ttl in rs_nscan_os_ttl {
+    let rs_os_ttl: Vec<OsTtl> = serde_json::from_str(define::NODEMAP_OS_TTL).unwrap_or(vec![]);
+    for os_ttl in rs_os_ttl {
         ttl_map.insert(os_ttl.initial_ttl, os_ttl.description);
     }
     ttl_map

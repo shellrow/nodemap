@@ -9,7 +9,7 @@ mod db;
 mod os;
 mod handler;
 
-use std::{env, process::exit};
+use std::env;
 use chrono::{Local, DateTime};
 use clap::{Command, AppSettings, Arg, App, ArgGroup};
 
@@ -182,7 +182,7 @@ fn get_app_settings<'a>() -> Command<'a> {
             .long("protocol")
             .takes_value(true)
             .value_name("protocol")
-            .validator(validator::validate_portscantype)
+            .validator(validator::validate_protocol)
         )
         .arg(Arg::new("maxhop")
             .help("Set max hop(TTL) for ping or traceroute")

@@ -1,6 +1,6 @@
 use regex::Regex;
 use std::str::FromStr;
-use std::net::IpAddr;
+use std::net::{IpAddr, SocketAddr};
 use std::path::Path;
 use dns_lookup::lookup_host;
 use nodemap_core::network;
@@ -56,8 +56,15 @@ pub fn validate_host_opt(v: &str) -> Result<(), String> {
             match IpAddr::from_str(&ip_str) {
                 Ok(_) => {},
                 Err(_) => {
-                    if !re_host.is_match(ip_str) {
-                        return Err(String::from("Please specify ip address or host name"));
+                    match SocketAddr::from_str(&ip_str) {
+                        Ok(_) => {
+                            return Ok(());
+                        },
+                        Err(_) => {
+                            if !re_host.is_match(ip_str) {
+                                return Err(String::from("Please specify ip address or host name"));
+                            }
+                        },
                     }
                 }
             }
@@ -134,6 +141,15 @@ pub fn validate_portscantype(v: &str) -> Result<(), String> {
     }
 }
 
+pub fn validate_protocol(v: &str) -> Result<(), String> {
+    let valid_scan_types = vec!["ICMP","ICMPv4","ICMPv6","TCP","UDP"];
+    if valid_scan_types.contains(&v) {
+        Ok(())
+    }else{
+        Err(String::from("Invalid PortScanType"))
+    }
+}
+
 pub fn validate_uri_opt(v: &str) -> Result<(), String> {
     let re = Regex::new(r"https?://[\w!\?/\+\-_~=;\.,\*&@#\$%\(\)'\[\]]+").unwrap();
     if !re.is_match(&v) {
@@ -175,6 +191,18 @@ pub fn validate_ttl(v: &str) -> Result<(), String> {
 pub fn is_ipaddr(host: String) -> bool {
     let ipaddr = IpAddr::from_str(&host);
     match ipaddr {
+        Ok(_) => {
+            return true;
+        },
+        Err(_) => {
+            return false;
+        }
+    }
+}
+
+pub fn is_socketaddr(host: String) -> bool {
+    let socket_addr = SocketAddr::from_str(&host);
+    match socket_addr {
         Ok(_) => {
             return true;
         },
