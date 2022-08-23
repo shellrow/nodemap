@@ -26,4 +26,4 @@ async-io = "1.6"
 chrono = "0.4"
 regex = "1.6.0"
 dns-lookup = "1.0"
-nodemap-core = { path = "../nodemap-core", version = "0.1.0", default-features = false}
+nodemap-core = { path = "./nodemap-core", version = "0.1.0", default-features = false}
