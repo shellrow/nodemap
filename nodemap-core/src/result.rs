@@ -1,5 +1,17 @@
 use std::time::Duration;
+use std::net::IpAddr;
 use serde::{Serialize, Deserialize};
+
+/// Exit status of probe
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub enum ProbeStatus {
+    /// Successfully completed
+    Done,
+    /// Interrupted by error
+    Error,
+    /// Execution time exceeds the configured timeout value
+    Timeout,
+}
 
 #[derive(Clone, Debug ,Serialize, Deserialize)]
 pub struct PortInfo {
@@ -85,4 +97,44 @@ impl HostScanResult {
             total_scan_time: Duration::from_millis(0) 
         }
     }
+}
+
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub struct PingResult {
+    /// Sequence number
+    pub seq: u8,
+    /// IP address
+    pub ip_addr: IpAddr,
+    /// Host name
+    pub host_name: String,
+    /// Port
+    pub port_number: Option<u16>, 
+    /// Time To Live
+    pub ttl: u8,
+    /// Number of hops
+    pub hop: u8,
+    /// Round Trip Time
+    pub rtt: Duration,
+    /// Status
+    pub status: ProbeStatus,
+    /// Protocol
+    pub protocol: String,
+}
+
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub struct PingStat {
+    /// Results
+    pub ping_results: Vec<PingResult>,
+    /// The entire ping probe time
+    pub probe_time: Duration,
+    /// Transmitted packets
+    pub transmitted_count: u8,
+    /// Received packets
+    pub received_count: u8,
+    /// Minimum RTT
+    pub min: Duration,
+    /// Avarage RTT
+    pub avg: Duration,
+    /// Maximum RTT
+    pub max: Duration,
 }
