@@ -13,6 +13,16 @@ pub enum ProbeStatus {
     Timeout,
 }
 
+impl ProbeStatus {
+    pub fn name(&self) -> String {
+        match *self {
+            ProbeStatus::Done => String::from("Done"),
+            ProbeStatus::Error => String::from("Error"),
+            ProbeStatus::Timeout => String::from("Timeout"),
+        }
+    }
+}
+
 #[derive(Clone, Debug ,Serialize, Deserialize)]
 pub struct PortInfo {
     pub port_number: u16,
@@ -75,7 +85,7 @@ impl PortScanResult {
             port_scan_time: Duration::from_millis(0), 
             service_detection_time: Duration::from_millis(0), 
             os_detection_time: Duration::from_millis(0), 
-            total_scan_time: Duration::from_millis(0) 
+            total_scan_time: Duration::from_millis(0),
         }
     }
 }
@@ -94,7 +104,7 @@ impl HostScanResult {
             hosts: vec![], 
             host_scan_time: Duration::from_millis(0), 
             os_detection_time: Duration::from_millis(0), 
-            total_scan_time: Duration::from_millis(0) 
+            total_scan_time: Duration::from_millis(0),
         }
     }
 }
@@ -128,13 +138,27 @@ pub struct PingStat {
     /// The entire ping probe time
     pub probe_time: Duration,
     /// Transmitted packets
-    pub transmitted_count: u8,
+    pub transmitted_count: usize,
     /// Received packets
-    pub received_count: u8,
+    pub received_count: usize,
     /// Minimum RTT
     pub min: Duration,
     /// Avarage RTT
     pub avg: Duration,
     /// Maximum RTT
     pub max: Duration,
+}
+
+impl PingStat {
+    pub fn new() -> PingStat {
+        PingStat { 
+            ping_results: vec![], 
+            probe_time: Duration::from_millis(0), 
+            transmitted_count: 0, 
+            received_count: 0, 
+            min: Duration::from_millis(0), 
+            avg: Duration::from_millis(0), 
+            max: Duration::from_millis(0) 
+        }
+    }
 }
