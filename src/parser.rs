@@ -252,7 +252,7 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         opt.send_rate = Duration::from_millis(v_rate);
     }
     if matches.contains_id("count") {
-        let v_count: u32 = *matches.get_one::<u32>("count").unwrap();
+        let v_count: u32 = matches.get_one::<String>("count").unwrap().parse::<u32>().unwrap();
         opt.count = v_count;
     }
     if matches.contains_id("service") {
