@@ -7,6 +7,7 @@ use netscan::os::ProbeResult;
 use netscan::result::{PortScanResult as NsPortScanResult, HostScanResult as NsHostScanResult, ScanStatus};
 use netscan::service::PortDatabase;
 use nodemap_core::option::TargetInfo;
+use nodemap_core::result::PingStat;
 use nodemap_core::{option, scan, result, network};
 use console::{Style, Emoji};
 use indicatif::{ProgressBar, ProgressStyle};
@@ -223,8 +224,22 @@ pub async fn handle_host_scan(opt: option::ScanOption) {
 
 }
 
-pub fn handle_ping(opt: option::ScanOption) {
-
+pub fn handle_ping(opt: option::ScanOption) {    
+    //let mut result: result::PingStat = result::PingStat::new();
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let ping_opt = opt.clone();
+    let handle = thread::spawn(move||{
+        scan::run_ping(ping_opt, &msg_tx)
+    });
+    //let pb = get_spinner();
+    //pb.set_message("Ping probe ...");
+    while let Ok(msg) = msg_rx.recv() {
+        println!("{}", msg);
+    }
+    let result: PingStat = handle.join().unwrap();
+    //pb.finish_and_clear();
+    //println!("Ping ... {} {}",Emoji::new("✅", ""),Style::new().green().apply_to("Done"));
+    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
 pub fn handle_trace(opt: option::ScanOption) {

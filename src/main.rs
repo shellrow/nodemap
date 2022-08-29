@@ -64,7 +64,7 @@ fn main() {
             }
         },
         option::CommandType::Ping => {
-            
+            handler::handle_ping(opt);
         },
         option::CommandType::Traceroute => {
             
