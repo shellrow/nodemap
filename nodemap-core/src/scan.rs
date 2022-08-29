@@ -13,9 +13,9 @@ use webscan::RequestMethod;
 use webscan::{UriScanner, DomainScanner};
 use webscan::{UriScanResult, DomainScanResult};
 use tracert::trace::{Tracer, TraceResult};
-use tracert::ping::{Pinger, PingResult};
-
+use tracert::ping::{Pinger};
 use crate::option::TargetInfo;
+use crate::result::{PingStat, PingResult, ProbeStatus};
 
 use super::option::ScanOption;
 
@@ -163,7 +163,7 @@ pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx:
     results
 }
 
-pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingResult {
+pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
     let pinger: Pinger = Pinger::new(opt.targets[0].ip_addr).unwrap();
     let rx = pinger.get_progress_receiver();
     let handle = thread::spawn(move|| {
@@ -175,7 +175,25 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingResult {
             Err(_) => {},
         }
     }
-    let result = handle.join().unwrap().unwrap();
+    let ping_result: tracert::ping::PingResult = handle.join().unwrap().unwrap();
+    let mut result = PingStat::new();
+    result.probe_time = ping_result.probe_time;
+    result.transmitted_count = ping_result.results.len();
+    result.received_count = ping_result.results.len();
+    for node in ping_result.results {
+        let r = PingResult {
+            seq: node.seq,
+            ip_addr : node.ip_addr,
+            host_name : node.host_name,
+            port_number : Some(0), 
+            ttl : 0,
+            hop : node.hop.unwrap(),
+            rtt : node.rtt,
+            status : ProbeStatus::Done,
+            protocol : String::from("ICMP"),
+        };
+        result.ping_results.push(r);
+    }
     result
 }
 
