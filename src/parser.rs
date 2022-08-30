@@ -145,12 +145,20 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         }
     }else if matches.contains_id("ping") {
         opt.command_type = option::CommandType::Ping;
+        opt.protocol = Protocol::ICMPv4;
         let target: &str = matches.value_of("ping").unwrap();
         match target.parse::<IpAddr>(){
             Ok(ip) => {
                 opt.targets.push(TargetInfo::new_with_ip_addr(ip));
             },
-            Err(_) => {},
+            Err(_) => {
+                match SocketAddr::from_str(&target) {
+                    Ok(socket_addr) => {
+                        opt.targets.push(TargetInfo::new_with_socket(socket_addr.ip(), socket_addr.port()));
+                    },
+                    Err(_) => {},
+                }
+            },
         }
     }else if matches.contains_id("trace") {
         opt.command_type = option::CommandType::Traceroute;
@@ -206,7 +214,7 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         }else if v_protocol == "UDP" || v_protocol == "udp" {
             opt.protocol = Protocol::UDP;
             opt.host_scan_type = ScanType::UdpPingScan;
-        }else if v_protocol == "ICMPv4" || v_protocol == "icmpv4" {
+        }else if v_protocol == "ICMPv4" || v_protocol == "icmpv4" || v_protocol == "ICMP" || v_protocol == "icmp" {
             opt.protocol = Protocol::ICMPv4;
             opt.host_scan_type = ScanType::IcmpPingScan;
         }else if v_protocol == "ICMPv6" || v_protocol == "icmpv6" {
