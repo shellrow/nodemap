@@ -3,6 +3,8 @@ use std::sync::mpsc;
 use std::thread;
 use std::fs::{read, read_to_string};
 use std::collections::HashMap;
+use std::time::Duration;
+use std::iter::Iterator;
 use netscan::result::{PortScanResult, HostScanResult};
 use netscan::setting::Destination;
 use netscan::blocking::{PortScanner, HostScanner};
@@ -14,7 +16,7 @@ use webscan::{UriScanner, DomainScanner};
 use webscan::{UriScanResult, DomainScanResult};
 use tracert::trace::{Tracer, TraceResult};
 use tracert::ping::{Pinger};
-use crate::option::TargetInfo;
+use crate::option::{TargetInfo, Protocol};
 use crate::result::{PingStat, PingResult, ProbeStatus};
 
 use super::option::ScanOption;
@@ -164,13 +166,29 @@ pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx:
 }
 
 pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
-    let pinger: Pinger = Pinger::new(opt.targets[0].ip_addr).unwrap();
+    let mut pinger: Pinger = Pinger::new(opt.targets[0].ip_addr).unwrap();
+    match opt.protocol {
+        Protocol::ICMPv4 => {
+            pinger.set_protocol(tracert::protocol::Protocol::Icmpv4);
+        },
+        Protocol::ICMPv6 => {
+            pinger.set_protocol(tracert::protocol::Protocol::Icmpv6);
+        },
+        Protocol::TCP => {
+            pinger.set_protocol(tracert::protocol::Protocol::Tcp);
+            pinger.dst_port = opt.targets[0].ports[0];
+        },
+        Protocol::UDP => {
+            pinger.set_protocol(tracert::protocol::Protocol::Udp);
+            pinger.dst_port = opt.targets[0].ports[0];
+        },
+    }
     let rx = pinger.get_progress_receiver();
     let handle = thread::spawn(move|| {
         pinger.ping()
     });
     while let Ok(node) = rx.lock().unwrap().recv() {
-        match msg_tx.send(format!("{} {} {:?} {:?}", node.seq, node.ip_addr, node.hop, node.rtt)) {
+        match msg_tx.send(format!("[{}] SEQ:{} IP:{} TTL:{:?} HOP:{:?} RTT:{:?}", opt.protocol.name(), node.seq, node.ip_addr, node.ttl.unwrap_or(0), node.hop.unwrap_or(0), node.rtt)) {
             Ok(_) => {},
             Err(_) => {},
         }
@@ -180,20 +198,37 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
     result.probe_time = ping_result.probe_time;
     result.transmitted_count = ping_result.results.len();
     result.received_count = ping_result.results.len();
+    let mut rtt_vec: Vec<u128> = vec![];
     for node in ping_result.results {
         let r = PingResult {
             seq: node.seq,
             ip_addr : node.ip_addr,
             host_name : node.host_name,
-            port_number : Some(0), 
-            ttl : 0,
-            hop : node.hop.unwrap(),
+            port_number : if opt.targets[0].ports.len() > 0 { Some(opt.targets[0].ports[0]) } else { None }, 
+            ttl : node.ttl.unwrap_or(0),
+            hop : node.hop.unwrap_or(0),
             rtt : node.rtt,
             status : ProbeStatus::Done,
-            protocol : String::from("ICMP"),
+            protocol : opt.protocol.name(),
         };
         result.ping_results.push(r);
+        rtt_vec.push(node.rtt.as_millis());
     }
+    let min: u128;
+    let max: u128;
+    let avg: u128 = (rtt_vec.iter().sum::<u128>() as usize / rtt_vec.len()) as u128;
+    match rtt_vec.iter().min() {
+        Some(n) => min = *n,
+        None => unreachable!(),
+    }
+    match rtt_vec.iter().max() {
+        Some(n) => max = *n,
+        None => unreachable!(),
+    }
+    result.min = Duration::from_millis(min as u64);
+    result.max = Duration::from_millis(max as u64);
+    result.avg = Duration::from_millis(avg as u64);
+
     result
 }
 
