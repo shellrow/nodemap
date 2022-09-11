@@ -1,8 +1,11 @@
+use std::collections::HashMap;
 use std::time::Duration;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::fs::read_to_string;
 use ipnet::Ipv4Net;
 use std::str::FromStr;
+use crate::model::TCPFingerprint;
+
 use super::network;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -183,6 +186,10 @@ pub struct ScanOption {
     pub request_method: String,
     pub data_provider: String,
     pub save_file_path: String,
+    pub http_ports: Vec<u16>,
+    pub https_ports: Vec<u16>,
+    pub tcp_map: HashMap<String,String>,
+    pub tcp_fingerprints: Vec<TCPFingerprint>
 }
 
 impl ScanOption {
@@ -217,6 +224,10 @@ impl ScanOption {
             request_method: String::new(),
             data_provider: String::new(),
             save_file_path: String::new(),
+            http_ports: vec![],
+            https_ports: vec![],
+            tcp_map: HashMap::new(),
+            tcp_fingerprints: vec![]
         }
     }
     pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8, port: Option<u16>) {

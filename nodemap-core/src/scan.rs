@@ -3,9 +3,9 @@ use std::sync::mpsc;
 use std::thread;
 use std::fs::{read, read_to_string};
 use std::collections::HashMap;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use std::iter::Iterator;
-use netscan::result::{PortScanResult, HostScanResult};
+use netscan::result::{HostScanResult};
 use netscan::setting::Destination;
 use netscan::blocking::{PortScanner, HostScanner};
 use netscan::async_io::{PortScanner as AsyncPortScanner, HostScanner as AsyncHostScanner};
@@ -17,11 +17,11 @@ use webscan::{UriScanResult, DomainScanResult};
 use tracert::trace::{Tracer, TraceResult};
 use tracert::ping::{Pinger};
 use crate::option::{TargetInfo, Protocol};
-use crate::result::{PingStat, PingResult, ProbeStatus};
-
+use crate::result::{PortScanResult, PingStat, PingResult, ProbeStatus};
+use crate::model::TCPFingerprint;
 use super::option::ScanOption;
 
-pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
+pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::PortScanResult {
     let mut port_scanner = match PortScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -46,7 +46,7 @@ pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScan
     result
 }
 
-pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
+pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::PortScanResult {
     let mut port_scanner = match AsyncPortScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -163,6 +163,105 @@ pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx:
     fingerprinter.add_probe_type(ProbeType::TcpProbe);
     let results = fingerprinter.probe();
     results
+}
+
+pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
+    let mut result: PortScanResult = PortScanResult::new();
+    // Port Scan
+    match msg_tx.send(String::from("START_PORTSCAN")) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
+    let ps_result: netscan::result::PortScanResult = run_async_port_scan(opt.clone(), &msg_tx).await;
+    match msg_tx.send(String::from("END_PORTSCAN")) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
+    // Service Detection
+    let mut sd_result: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
+    let mut sd_time: Duration = Duration::from_millis(0);
+    if opt.service_detection && ps_result.result_map.keys().len() > 0 {
+        match msg_tx.send(String::from("START_SERVICEDETECTION")) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+        let mut sd_targets: Vec<TargetInfo> = vec![];
+        let ip = ps_result.result_map.keys().last().unwrap().clone();
+        let mut target: TargetInfo  = TargetInfo::new_with_ip_addr(ip);
+        target.ports = ps_result.get_open_ports(ip);
+        sd_targets.push(target);
+        let port_db: PortDatabase = PortDatabase { http_ports: opt.http_ports.clone(), https_ports: opt.https_ports.clone() };
+        let start_time: Instant = Instant::now();
+        sd_result = run_service_detection(sd_targets, &msg_tx, Some(port_db));
+        sd_time = Instant::now().duration_since(start_time);
+        match msg_tx.send(String::from("END_SERVICEDETECTION")) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+    }
+    // os fingerprinting
+    let mut od_result: Vec<ProbeResult> = vec![];
+    let mut od_time: Duration = Duration::from_millis(0);
+    if opt.os_detection && ps_result.result_map.keys().len() > 0 {
+        match msg_tx.send(String::from("START_OSDETECTION")) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+        let ip = ps_result.result_map.keys().last().unwrap().clone();
+        let mut od_targets: Vec<TargetInfo> = vec![];
+        let mut target: TargetInfo  = TargetInfo::new_with_ip_addr(ip);
+        target.ports = ps_result.get_open_ports(ip);
+        od_targets.push(target);
+        let start_time: Instant = Instant::now();
+        od_result = run_os_fingerprinting(opt.clone(),  od_targets, &msg_tx);
+        od_time = Instant::now().duration_since(start_time);
+        match msg_tx.send(String::from("END_OSDETECTION")) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+    }
+    // return crate::result::PortScanResult
+    if ps_result.result_map.keys().len() > 0 {
+        let ip = ps_result.result_map.keys().last().unwrap().clone();
+        let ports = ps_result.result_map.values().last().unwrap().clone();
+        let tcp_map = opt.tcp_map;
+        let t_map: HashMap<u16, String> = HashMap::new();
+        let service_map = sd_result.get(&ip).unwrap_or(&t_map);
+        // PortInfo
+        for port in ports {
+            let port_info = crate::result::PortInfo { 
+                port_number: port.port.clone(), 
+                port_status: format!("{:?}", port.status), 
+                service_name: tcp_map.get(&port.port.to_string()).unwrap_or(&String::new()).to_string(), 
+                service_version: service_map.get(&port.port).unwrap_or(&String::new()).to_string(), 
+                remark: String::new(), 
+            };     
+            result.ports.push(port_info);  
+        }
+        // HostInfo
+        let tcp_fingetprint =  if od_result.len() > 0 { crate::os::verify_fingerprints(od_result[0].tcp_fingerprint.clone(), opt.tcp_fingerprints) } else{ TCPFingerprint::new() };
+        let host_info = crate::result::HostInfo {
+            ip_addr: ip.to_string(),
+            host_name: dns_lookup::lookup_addr(&ip).unwrap_or(String::new()),
+            mac_addr: String::new(),
+            vendor_info: String::new(),
+            os_name: tcp_fingetprint.os_name ,
+            cpe: tcp_fingetprint.cpe,
+        };
+        result.host = host_info;
+        result.port_scan_time = ps_result.scan_time;
+        result.service_detection_time = sd_time;
+        result.os_detection_time = od_time;
+        result.total_scan_time = result.port_scan_time + result.service_detection_time + result.os_detection_time;
+    }
+    return result;
+}
+
+pub async fn run_node_scan(_opt: ScanOption, _msg_tx: &mpsc::Sender<String>) {
+    // host scan
+    // get mac addresses (lan only)
+    // guess OS from TTL
+    // return crate::result::HostScanResult
 }
 
 pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {

@@ -2,8 +2,11 @@ pub mod option;
 pub mod result;
 pub mod process;
 pub mod sys;
+pub mod os;
 pub mod network;
 pub mod scan;
+pub mod model;
+pub mod define;
 
 // All of the following is test code for cxx
 #[cfg(feature = "cpp")]
