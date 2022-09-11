@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use super::define;
-use crate::model::{OuiData, PortData, OsTtl, TCPFingerprint};
+use nodemap_core::model::{OuiData, PortData, OsTtl, TCPFingerprint};
 
 pub fn get_oui_map() -> HashMap<String, String> {
     let mut oui_map: HashMap<String, String> = HashMap::new();

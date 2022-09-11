@@ -87,6 +87,7 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
             target_info.ports = db::get_default_ports();
         }
         opt.targets.push(target_info);
+        opt.tcp_map = db::get_tcp_map();
     }else if matches.contains_id("host") {
         opt.command_type = option::CommandType::HostScan;
         opt.protocol = option::Protocol::ICMPv4;
@@ -265,9 +266,12 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
     }
     if matches.contains_id("service") {
         opt.service_detection = true;
+        opt.http_ports = db::get_http_ports();
+        opt.https_ports = db::get_https_ports();
     }
     if matches.contains_id("os") {
         opt.os_detection = true;
+        opt.tcp_fingerprints = db::get_tcp_fingerprints(); 
     }
     if matches.contains_id("async") {
         opt.async_scan = true;

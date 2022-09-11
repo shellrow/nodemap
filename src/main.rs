@@ -4,9 +4,7 @@ extern crate clap;
 mod define;
 mod validator;
 mod parser;
-mod model;
 mod db;
-mod os;
 mod handler;
 
 use std::env;
