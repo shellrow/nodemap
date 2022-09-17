@@ -96,14 +96,14 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         let target_vec: Vec<&str> = target.split("/").collect();
         if validator::is_ipaddr(target_vec[0].to_string()) || validator::is_socketaddr(target_vec[0].to_string()) {
             let mut port :u16 = 80;
-            let ip_string = if validator::is_socketaddr(target_vec[0].to_string()) {
+            let ip_addr: IpAddr = if validator::is_socketaddr(target_vec[0].to_string()) {
                 let socket_addr = SocketAddr::from_str(target_vec[0]).unwrap();
                 port = socket_addr.port();
-                socket_addr.ip().to_string()
+                socket_addr.ip()
             }else{
-                target_vec[0].to_string()
+                IpAddr::from_str(target_vec[0]).unwrap() 
             };
-            let nw_addr: String = match network::get_network_address(ip_string) {
+            let nw_addr: String = match network::get_network_address(ip_addr) {
                 Ok(nw_addr) => nw_addr,
                 Err(e) => {
                     print!("{}", e);
