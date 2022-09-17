@@ -1,27 +1,18 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
-use std::str::FromStr;
 use ipnet::{Ipv4Net, Ipv6Net};
 use pnet_packet::{Packet, MutablePacket};
 
-pub fn get_network_address(ip_str: String) -> Result<String, String>{
-    let addr = IpAddr::from_str(&ip_str);
-    match addr {
-        Ok(ip_addr) => {
-            match ip_addr {
-                IpAddr::V4(ipv4_addr) => {
-                    let net: Ipv4Net = Ipv4Net::new(ipv4_addr, 24).unwrap();
-                    Ok(net.network().to_string())
-                },
-                IpAddr::V6(ipv6_addr) => {
-                    let net: Ipv6Net = Ipv6Net::new(ipv6_addr, 24).unwrap();
-                    Ok(net.network().to_string())
-                },
-            }
+pub fn get_network_address(ip_addr: IpAddr) -> Result<String, String>{
+    match ip_addr {
+        IpAddr::V4(ipv4_addr) => {
+            let net: Ipv4Net = Ipv4Net::new(ipv4_addr, 24).unwrap();
+            Ok(net.network().to_string())
         },
-        Err(_) => {
-            Err(String::from("Invalid IP Address"))
-        }
+        IpAddr::V6(ipv6_addr) => {
+            let net: Ipv6Net = Ipv6Net::new(ipv6_addr, 24).unwrap();
+            Ok(net.network().to_string())
+        },
     }
 }
 
@@ -88,7 +79,7 @@ pub fn get_mac_addresses(ips: Vec<IpAddr>, src_ip: IpAddr) -> HashMap<IpAddr, St
         let interfaces = pnet_datalink::interfaces();
         let iface = interfaces.into_iter().filter(|interface: &pnet_datalink::NetworkInterface| interface.index == c_interface.index).next().expect("Failed to get Interface");
         for ip in ips {
-            if !is_global_addr(ip) && in_same_network(src_ip.to_string(), ip.to_string()) {
+            if !is_global_addr(ip) && in_same_network(src_ip, ip) {
                 let mac_addr = get_mac_through_arp(&iface, ip.to_string().parse::<Ipv4Addr>().unwrap()).to_string();
                 map.insert(ip, mac_addr);
                 /* if mac_addr.len() > 16 {
@@ -114,12 +105,12 @@ pub fn is_global_addr(ip_addr: IpAddr) -> bool {
     }
 }
 
-pub fn in_same_network(src_ip: String, dst_ip: String) -> bool {
-    let src_ip_nw = match get_network_address(src_ip.to_string()) {
+pub fn in_same_network(src_ip: IpAddr, dst_ip: IpAddr) -> bool {
+    let src_ip_nw = match get_network_address(src_ip) {
         Ok(nw) => nw,
         Err(_) => return false,
     };
-    let dst_ip_nw = match get_network_address(dst_ip.to_string()) {
+    let dst_ip_nw = match get_network_address(dst_ip) {
         Ok(nw) => nw,
         Err(_) => return false,
     };
