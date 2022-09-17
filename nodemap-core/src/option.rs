@@ -189,7 +189,9 @@ pub struct ScanOption {
     pub http_ports: Vec<u16>,
     pub https_ports: Vec<u16>,
     pub tcp_map: HashMap<String,String>,
-    pub tcp_fingerprints: Vec<TCPFingerprint>
+    pub tcp_fingerprints: Vec<TCPFingerprint>,
+    pub oui_map: HashMap<String, String>,
+    pub ttl_map: HashMap<u8, String>,
 }
 
 impl ScanOption {
@@ -227,7 +229,9 @@ impl ScanOption {
             http_ports: vec![],
             https_ports: vec![],
             tcp_map: HashMap::new(),
-            tcp_fingerprints: vec![]
+            tcp_fingerprints: vec![],
+            oui_map: HashMap::new(),
+            ttl_map: HashMap::new(),
         }
     }
     pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8, port: Option<u16>) {
