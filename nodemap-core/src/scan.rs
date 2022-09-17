@@ -1,11 +1,10 @@
 use std::net::IpAddr;
 use std::sync::mpsc;
-use std::thread;
+use std::{thread, vec};
 use std::fs::{read, read_to_string};
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use std::iter::Iterator;
-use netscan::result::{HostScanResult};
 use netscan::setting::Destination;
 use netscan::blocking::{PortScanner, HostScanner};
 use netscan::async_io::{PortScanner as AsyncPortScanner, HostScanner as AsyncHostScanner};
@@ -17,9 +16,10 @@ use webscan::{UriScanResult, DomainScanResult};
 use tracert::trace::{Tracer, TraceResult};
 use tracert::ping::{Pinger};
 use crate::option::{TargetInfo, Protocol};
-use crate::result::{PortScanResult, PingStat, PingResult, ProbeStatus};
+use crate::result::{PortScanResult, HostScanResult, HostInfo, PingStat, PingResult, ProbeStatus};
 use crate::model::TCPFingerprint;
-use super::option::ScanOption;
+use crate::option::ScanOption;
+use crate::{define, network};
 
 pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::PortScanResult {
     let mut port_scanner = match PortScanner::new(opt.src_ip){
@@ -73,7 +73,7 @@ pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>)
     result
 }
 
-pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScanResult {
+pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::HostScanResult {
     let mut host_scanner = match HostScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -100,7 +100,7 @@ pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScan
     result
 }
 
-pub async fn run_async_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScanResult {
+pub async fn run_async_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::HostScanResult {
     let mut host_scanner = match AsyncHostScanner::new(opt.src_ip){
         Ok(scanner) => (scanner),
         Err(e) => panic!("Error creating scanner: {}", e),
@@ -168,12 +168,18 @@ pub fn run_os_fingerprinting(opt: ScanOption, targets: Vec<TargetInfo>, _msg_tx:
 pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PortScanResult {
     let mut result: PortScanResult = PortScanResult::new();
     // Port Scan
-    match msg_tx.send(String::from("START_PORTSCAN")) {
+    match msg_tx.send(String::from(define::MESSAGE_START_PORTSCAN)) {
         Ok(_) => {},
         Err(_) => {},
     }
-    let ps_result: netscan::result::PortScanResult = run_async_port_scan(opt.clone(), &msg_tx).await;
-    match msg_tx.send(String::from("END_PORTSCAN")) {
+    let ps_result: netscan::result::PortScanResult = if opt.async_scan {
+        async_io::block_on(async {
+            run_async_port_scan(opt.clone(), &msg_tx).await
+        })
+    }else{
+        run_port_scan(opt.clone(), &msg_tx)
+    };
+    match msg_tx.send(String::from(define::MESSAGE_END_PORTSCAN)) {
         Ok(_) => {},
         Err(_) => {},
     }
@@ -181,7 +187,7 @@ pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) ->
     let mut sd_result: HashMap<IpAddr, HashMap<u16, String>> = HashMap::new();
     let mut sd_time: Duration = Duration::from_millis(0);
     if opt.service_detection && ps_result.result_map.keys().len() > 0 {
-        match msg_tx.send(String::from("START_SERVICEDETECTION")) {
+        match msg_tx.send(String::from(define::MESSAGE_START_SERVICEDETECTION)) {
             Ok(_) => {},
             Err(_) => {},
         }
@@ -194,16 +200,16 @@ pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) ->
         let start_time: Instant = Instant::now();
         sd_result = run_service_detection(sd_targets, &msg_tx, Some(port_db));
         sd_time = Instant::now().duration_since(start_time);
-        match msg_tx.send(String::from("END_SERVICEDETECTION")) {
+        match msg_tx.send(String::from(define::MESSAGE_END_SERVICEDETECTION)) {
             Ok(_) => {},
             Err(_) => {},
         }
     }
-    // os fingerprinting
+    // OS Fingerprinting
     let mut od_result: Vec<ProbeResult> = vec![];
     let mut od_time: Duration = Duration::from_millis(0);
     if opt.os_detection && ps_result.result_map.keys().len() > 0 {
-        match msg_tx.send(String::from("START_OSDETECTION")) {
+        match msg_tx.send(String::from(define::MESSAGE_START_OSDETECTION)) {
             Ok(_) => {},
             Err(_) => {},
         }
@@ -215,7 +221,7 @@ pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) ->
         let start_time: Instant = Instant::now();
         od_result = run_os_fingerprinting(opt.clone(),  od_targets, &msg_tx);
         od_time = Instant::now().duration_since(start_time);
-        match msg_tx.send(String::from("END_OSDETECTION")) {
+        match msg_tx.send(String::from(define::MESSAGE_END_OSDETECTION)) {
             Ok(_) => {},
             Err(_) => {},
         }
@@ -257,11 +263,63 @@ pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) ->
     return result;
 }
 
-pub async fn run_node_scan(_opt: ScanOption, _msg_tx: &mpsc::Sender<String>) {
-    // host scan
-    // get mac addresses (lan only)
-    // guess OS from TTL
-    // return crate::result::HostScanResult
+pub async fn run_node_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> HostScanResult {
+    let mut result: HostScanResult = HostScanResult::new();
+    // Host Scan
+    match msg_tx.send(String::from(define::MESSAGE_START_HOSTSCAN)) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
+    let hs_result: netscan::result::HostScanResult = if opt.async_scan {
+        async_io::block_on(async {
+            run_async_host_scan(opt.clone(), &msg_tx).await
+        })
+    }else{
+        run_host_scan(opt.clone(), &msg_tx)
+    };
+    match msg_tx.send(String::from(define::MESSAGE_END_HOSTSCAN)) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
+    // Get MAC Addresses (LAN only)
+    let mut arp_targets: Vec<IpAddr> = vec![];
+    for host in hs_result.get_hosts() {
+        if network::in_same_network(opt.src_ip, host) {
+            arp_targets.push(host);
+        }
+    }
+    if arp_targets.len() > 0 {
+        match msg_tx.send(String::from(define::MESSAGE_START_ARPSCAN)) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+    }
+    let mac_map: HashMap<IpAddr, String> = network::get_mac_addresses(arp_targets.clone(), opt.src_ip);
+    if arp_targets.len() > 0 {
+        match msg_tx.send(String::from(define::MESSAGE_END_ARPSCAN)) {
+            Ok(_) => {},
+            Err(_) => {},
+        }
+    }
+    for host in hs_result.hosts {
+        let host_info = HostInfo {
+            ip_addr: host.ip_addr.to_string(),
+            host_name: dns_lookup::lookup_addr(&host.ip_addr).unwrap_or(String::new()),
+            mac_addr: mac_map.get(&host.ip_addr).unwrap_or(&String::new()).to_string(),
+            vendor_info: if let Some(mac) = mac_map.get(&host.ip_addr){
+                if mac.len() > 16 {
+                    let prefix8 = mac[0..8].to_uppercase();
+                    opt.oui_map.get(&prefix8).unwrap_or(&String::new()).to_string()
+                }else{
+                    opt.oui_map.get(mac).unwrap_or(&String::new()).to_string()
+                }
+            }else{String::new()},
+            os_name: opt.ttl_map.get(&host.ttl).unwrap_or(&String::new()).to_string(),
+            cpe: String::new(),
+        };
+        result.hosts.push(host_info);
+    }
+    return result;
 }
 
 pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
