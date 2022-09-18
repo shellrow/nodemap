@@ -83,13 +83,6 @@ fn main() {
 }
 
 fn get_app_settings<'a>() -> Command<'a> {
-    // SubCommand
-    /* let sc_batch: App = App::new("batch")
-        .about("Batch scan with config. \nExamples: \nbatch <path_to_config_file>")
-        .arg(Arg::new("config")
-        .required(true)
-        .validator(validator::validate_filepath)); */
-
     let app: App = Command::new(crate_name!())
         .version(crate_version!())
         .author(crate_authors!())
