@@ -66,6 +66,40 @@ impl Protocol {
     }
 }
 
+/// Scan Type 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ScanType {
+    /// Default fast port scan type.
+    /// 
+    /// Send TCP packet with SYN flag to the target ports and check response.
+    TcpSynScan,
+    /// Attempt TCP connection and check port status.
+    /// 
+    /// Slow but can be run without administrator privileges.
+    TcpConnectScan,
+    /// Default host scan type.
+    /// 
+    /// Send ICMP echo request and check response.
+    IcmpPingScan,
+    /// Perform host scan for a specific service.
+    /// 
+    /// Send TCP packets with SYN flag to a specific port and check response.
+    TcpPingScan,
+    UdpPingScan,
+}
+
+impl ScanType {
+    pub fn to_netscan_type(&self) -> netscan::setting::ScanType {
+        match *self {
+            ScanType::TcpSynScan => netscan::setting::ScanType::TcpSynScan,
+            ScanType::TcpConnectScan => netscan::setting::ScanType::TcpConnectScan,
+            ScanType::IcmpPingScan => netscan::setting::ScanType::IcmpPingScan,
+            ScanType::TcpPingScan => netscan::setting::ScanType::TcpPingScan,
+            ScanType::UdpPingScan => netscan::setting::ScanType::UdpPingScan,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct TargetInfo {
     pub ip_addr: IpAddr,
@@ -165,9 +199,9 @@ pub struct ScanOption {
     pub targets: Vec<TargetInfo>,
     pub protocol: Protocol,
     pub max_hop: u8,
-    pub host_scan_type: netscan::setting::ScanType,
-    pub port_scan_type: netscan::setting::ScanType,
-    pub ping_type: tracert::protocol::Protocol,
+    pub host_scan_type: ScanType,
+    pub port_scan_type: ScanType,
+    pub ping_type: Protocol,
     pub timeout: Duration,
     pub wait_time: Duration,
     pub send_rate: Duration,
@@ -205,9 +239,9 @@ impl ScanOption {
             targets: vec![],
             protocol: Protocol::TCP,
             max_hop: 64,
-            host_scan_type: netscan::setting::ScanType::IcmpPingScan,
-            port_scan_type: netscan::setting::ScanType::TcpConnectScan,
-            ping_type: tracert::protocol::Protocol::Icmpv4,
+            host_scan_type: ScanType::IcmpPingScan,
+            port_scan_type: ScanType::TcpConnectScan,
+            ping_type: Protocol::ICMPv4,
             timeout: Duration::from_millis(30000),
             wait_time: Duration::from_millis(200),
             send_rate: Duration::from_millis(0),
