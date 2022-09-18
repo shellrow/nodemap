@@ -1,2 +1,2 @@
-# [WIP] nodemap
+# nodemap
 Cross-platform network mapper
