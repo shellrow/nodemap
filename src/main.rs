@@ -26,7 +26,7 @@ fn main() {
     match opt.command_type {
         option::CommandType::PortScan => {
             match opt.port_scan_type {
-                netscan::setting::ScanType::TcpSynScan => {
+                option::ScanType::TcpSynScan => {
                     if process::privileged() {
                         async_io::block_on(async {
                             handler::handle_port_scan(opt).await;
@@ -35,7 +35,7 @@ fn main() {
                         exit_with_error_message("Requires administrator privilege");
                     }
                 },
-                netscan::setting::ScanType::TcpConnectScan => {
+                option::ScanType::TcpConnectScan => {
                     async_io::block_on(async {
                         handler::handle_port_scan(opt).await;
                     })
