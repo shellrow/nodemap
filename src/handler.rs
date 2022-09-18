@@ -1,6 +1,6 @@
 use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
-use nodemap_core::result::PingStat;
+use nodemap_core::result::{PingStat, TraceResult};
 use nodemap_core::{option, scan, result, define};
 use indicatif::{ProgressBar, ProgressStyle};
 use super::db;
@@ -94,13 +94,21 @@ pub fn handle_ping(opt: option::ScanOption) {
 }
 
 pub fn handle_trace(opt: option::ScanOption) {
-    
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let handle = thread::spawn(move||{
+        scan::run_traceroute(opt, &msg_tx)
+    });
+    while let Ok(msg) = msg_rx.recv() {
+        println!("{}", msg);
+    }
+    let result: TraceResult = handle.join().unwrap();
+    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
-pub fn handle_domain_scan(opt: option::ScanOption) {
+/* pub fn handle_domain_scan(opt: option::ScanOption) {
     
-}
+} */
 
-pub fn handle_uri_scan(opt: option::ScanOption) {
+/* pub fn handle_uri_scan(opt: option::ScanOption) {
     
-}
+} */

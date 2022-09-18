@@ -13,10 +13,10 @@ use netscan::service::{ServiceDetector, PortDatabase};
 use webscan::RequestMethod;
 use webscan::{UriScanner, DomainScanner};
 use webscan::{UriScanResult, DomainScanResult};
-use tracert::trace::{Tracer, TraceResult};
+use tracert::trace::Tracer;
 use tracert::ping::{Pinger};
 use crate::option::{TargetInfo, Protocol};
-use crate::result::{PortScanResult, HostScanResult, HostInfo, PingStat, PingResult, ProbeStatus};
+use crate::result::{PortScanResult, HostScanResult, HostInfo, PingStat, PingResult, ProbeStatus, TraceResult, Node, NodeType};
 use crate::model::TCPFingerprint;
 use crate::option::ScanOption;
 use crate::{define, network};
@@ -396,12 +396,35 @@ pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceRe
         tracer.trace()
     });
     while let Ok(node) = rx.lock().unwrap().recv() {
-        match msg_tx.send(format!("{} {} {:?} {:?}", node.seq, node.ip_addr, node.hop, node.rtt)) {
+        match msg_tx.send(format!("SEQ:{} IP:{} HOP:{:?} RTT:{:?}", node.seq, node.ip_addr, node.hop.unwrap_or(0), node.rtt)) {
             Ok(_) => {},
             Err(_) => {},
         }
     }
-    let result = handle.join().unwrap().unwrap();
+    let trace_result: tracert::trace::TraceResult = handle.join().unwrap().unwrap();
+    let mut result: TraceResult = TraceResult::new();
+    for node in trace_result.nodes {
+        let n = Node {
+            seq: node.seq,
+            ip_addr: node.ip_addr,
+            host_name: node.host_name,
+            ttl: node.ttl,
+            hop: node.hop,
+            node_type: match node.node_type { 
+                tracert::node::NodeType::DefaultGateway => NodeType::DefaultGateway,
+                tracert::node::NodeType::Relay => NodeType::Relay,
+                tracert::node::NodeType::Destination => NodeType::Destination, 
+            },
+            rtt: node.rtt,
+        };
+        result.nodes.push(n);
+    }
+    result.status = match trace_result.status {
+        tracert::trace::TraceStatus::Done => ProbeStatus::Done,
+        tracert::trace::TraceStatus::Error => ProbeStatus::Error,
+        tracert::trace::TraceStatus::Timeout => ProbeStatus::Timeout,
+    };
+    result.probe_time = trace_result.probe_time;
     result
 }
 

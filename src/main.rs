@@ -65,7 +65,7 @@ fn main() {
             handler::handle_ping(opt);
         },
         option::CommandType::Traceroute => {
-            
+            handler::handle_trace(opt);
         },
         option::CommandType::DomainScan => {
             

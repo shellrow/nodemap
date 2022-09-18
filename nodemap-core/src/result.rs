@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{time::Duration, vec};
 use std::net::IpAddr;
 use serde::{Serialize, Deserialize};
 
@@ -21,6 +21,36 @@ impl ProbeStatus {
             ProbeStatus::Timeout => String::from("Timeout"),
         }
     }
+}
+
+/// Node type 
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub enum NodeType {
+    /// Default gateway
+    DefaultGateway,
+    /// Relay node
+    Relay,
+    /// Destination host
+    Destination,
+}
+
+/// Node structure
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub struct Node {
+    /// Sequence number
+    pub seq: u8,
+    /// IP address
+    pub ip_addr: IpAddr,
+    /// Host name
+    pub host_name: String,
+    /// Time To Live
+    pub ttl: Option<u8>,
+    /// Number of hops
+    pub hop: Option<u8>,
+    /// Node type
+    pub node_type: NodeType,
+    /// Round Trip Time
+    pub rtt: Duration,
 }
 
 #[derive(Clone, Debug ,Serialize, Deserialize)]
@@ -159,6 +189,26 @@ impl PingStat {
             min: Duration::from_millis(0), 
             avg: Duration::from_millis(0), 
             max: Duration::from_millis(0) 
+        }
+    }
+}
+
+#[derive(Clone, Debug ,Serialize, Deserialize)]
+pub struct TraceResult {
+    /// Nodes to destination
+    pub nodes: Vec<Node>,
+    /// Traceroute status
+    pub status: ProbeStatus,
+    /// The entire traceroute time
+    pub probe_time: Duration,
+}
+
+impl TraceResult {
+    pub fn new() -> TraceResult {
+        TraceResult {
+            nodes:vec![],
+            status: ProbeStatus::Done,
+            probe_time: Duration::from_millis(0),
         }
     }
 }
