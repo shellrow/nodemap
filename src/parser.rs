@@ -3,7 +3,6 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 use std::time::Duration;
 use clap::ArgMatches;
-use netscan::setting::ScanType;
 use nodemap_core::option;
 use nodemap_core::network;
 use nodemap_core::option::Protocol;
@@ -31,9 +30,9 @@ fn get_default_option() -> option::ScanOption {
         Err(_) => {},
     }
     if process::privileged() {
-        opt.port_scan_type = ScanType::TcpSynScan;
+        opt.port_scan_type = option::ScanType::TcpSynScan;
     }else{
-        opt.port_scan_type = ScanType::TcpConnectScan;
+        opt.port_scan_type = option::ScanType::TcpConnectScan;
         opt.async_scan = true;
     }
     opt
@@ -91,7 +90,7 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
     }else if matches.contains_id("host") {
         opt.command_type = option::CommandType::HostScan;
         opt.protocol = option::Protocol::ICMPv4;
-        opt.host_scan_type = ScanType::IcmpPingScan;
+        opt.host_scan_type = option::ScanType::IcmpPingScan;
         let target: &str = matches.value_of("host").unwrap();
         let target_vec: Vec<&str> = target.split("/").collect();
         if validator::is_ipaddr(target_vec[0].to_string()) || validator::is_socketaddr(target_vec[0].to_string()) {
@@ -211,16 +210,16 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         let v_protocol: String = matches.get_one::<String>("protocol").unwrap().to_string();
         if v_protocol == "TCP" || v_protocol == "tcp" {
             opt.protocol = Protocol::TCP;   
-            opt.host_scan_type = ScanType::TcpPingScan;
+            opt.host_scan_type = option::ScanType::TcpPingScan;
         }else if v_protocol == "UDP" || v_protocol == "udp" {
             opt.protocol = Protocol::UDP;
-            opt.host_scan_type = ScanType::UdpPingScan;
+            opt.host_scan_type = option::ScanType::UdpPingScan;
         }else if v_protocol == "ICMPv4" || v_protocol == "icmpv4" || v_protocol == "ICMP" || v_protocol == "icmp" {
             opt.protocol = Protocol::ICMPv4;
-            opt.host_scan_type = ScanType::IcmpPingScan;
+            opt.host_scan_type = option::ScanType::IcmpPingScan;
         }else if v_protocol == "ICMPv6" || v_protocol == "icmpv6" {
             opt.protocol = Protocol::ICMPv6;
-            opt.host_scan_type = ScanType::IcmpPingScan;
+            opt.host_scan_type = option::ScanType::IcmpPingScan;
         }
     }
     if matches.contains_id("maxhop") {
@@ -235,17 +234,17 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
     if matches.contains_id("scantype") {
         let v_scantype: String = matches.get_one::<String>("scantype").unwrap().to_string();
         if v_scantype == "SYN" || v_scantype == "syn" {
-            opt.port_scan_type = ScanType::TcpSynScan;   
+            opt.port_scan_type = option::ScanType::TcpSynScan;   
         }else if v_scantype == "CONNECT" || v_scantype == "connect" {
-            opt.port_scan_type = ScanType::TcpConnectScan;
+            opt.port_scan_type = option::ScanType::TcpConnectScan;
         }else if v_scantype == "ICMPv4" || v_scantype == "icmpv4" {
-            opt.host_scan_type = ScanType::IcmpPingScan;
+            opt.host_scan_type = option::ScanType::IcmpPingScan;
         }else if v_scantype == "ICMPv6" || v_scantype == "icmpv6" {
-            opt.host_scan_type = ScanType::IcmpPingScan;
+            opt.host_scan_type = option::ScanType::IcmpPingScan;
         }else if v_scantype == "TCP" || v_scantype == "tcp" {
-            opt.host_scan_type = ScanType::TcpPingScan;
+            opt.host_scan_type = option::ScanType::TcpPingScan;
         }else if v_scantype == "UDP" || v_scantype == "udp" {
-            opt.host_scan_type = ScanType::UdpPingScan;
+            opt.host_scan_type = option::ScanType::UdpPingScan;
         }
     }
     if matches.contains_id("timeout") {
