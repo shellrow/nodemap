@@ -3,3 +3,7 @@ members = [
     "core",
     "cli"
 ]
+
+exclude = [
+    "gui/src-tauri"
+]
