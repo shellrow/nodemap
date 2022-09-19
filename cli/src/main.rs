@@ -62,10 +62,18 @@ fn main() {
             }
         },
         option::CommandType::Ping => {
-            handler::handle_ping(opt);
+            if process::privileged() || sys::get_os_type() == "windows" {
+                handler::handle_ping(opt);
+            }else{
+                exit_with_error_message("Requires administrator privilege");
+            }
         },
         option::CommandType::Traceroute => {
-            handler::handle_trace(opt);
+            if process::privileged() || sys::get_os_type() == "windows" {
+                handler::handle_trace(opt);
+            }else{
+                exit_with_error_message("Requires administrator privilege");
+            }
         },
         option::CommandType::DomainScan => {
             
