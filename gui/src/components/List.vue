@@ -3,9 +3,10 @@ import { reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import {
   TemplateIcon,
-  ShoppingCartIcon,
   ChevronDownIcon,
   ServerIcon,
+  EyeIcon,
+  DocumentTextIcon
 } from '@heroicons/vue/outline';
 
 const lists = reactive([
@@ -15,26 +16,40 @@ const lists = reactive([
     link: '/',
   },
   {
-    name: 'Server',
-    icon: 'ServerIcon',
+    name: 'Probe',
+    icon: 'EyeIcon',
     link: '/#',
     show: false,
     sublists: [
       {
-        name: 'Status',
-        link: '/status',
+        name: 'PortScan',
+        link: '/port',
       },
       {
-        name: 'Log',
-        link: '/log',
+        name: 'HostScan',
+        link: '/host',
+      },
+      {
+        name: 'Ping',
+        link: '/ping',
+      },
+      {
+        name: 'Traceroute',
+        link: '/trace',
       },
     ],
+  },
+  {
+    name: 'Log',
+    icon: 'DocumentTextIcon',
+    link: '/log',
   },
 ]);
 
 const icons = {
   TemplateIcon: TemplateIcon,
-  ServerIcon: ServerIcon,
+  EyeIcon: EyeIcon,
+  DocumentTextIcon: DocumentTextIcon,
 };
 
 const toggle = (name) => {
