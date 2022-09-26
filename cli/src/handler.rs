@@ -105,10 +105,22 @@ pub fn handle_trace(opt: option::ScanOption) {
     println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
-/* pub fn handle_domain_scan(opt: option::ScanOption) {
-    
-} */
-
-/* pub fn handle_uri_scan(opt: option::ScanOption) {
-    
-} */
+pub fn handle_domain_scan(opt: option::ScanOption) {
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let handle = thread::spawn(move||{
+        scan::run_domain_scan(opt, &msg_tx)
+    });
+    let mut pb = get_spinner();
+    while let Ok(msg) = msg_rx.recv() {
+        if msg.contains("START_") || msg.contains("END_") {
+            match msg.as_str() {
+                define::MESSAGE_START_DOMAINSCAN => {pb.set_message("Scanning domains ...");},
+                define::MESSAGE_END_DOMAINSCAN => {pb.finish_with_message("Domain scan"); pb = get_spinner();},
+                _ => {},
+            }
+        }
+    }
+    pb.finish_and_clear();
+    let result: result::DomainScanResult = handle.join().unwrap();
+    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+}

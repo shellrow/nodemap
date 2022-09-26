@@ -212,3 +212,32 @@ impl TraceResult {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Domain {
+    pub domain_name: String,
+    pub ips: Vec<IpAddr>,
+}
+
+/// Result of domain scan  
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DomainScanResult {
+    /// HashMap of domain. 
+    /// 
+    /// (Domain, IP Addresses)
+    pub domains: Vec<Domain>,
+    /// Time from start to end of scan.  
+    pub scan_time: Duration,
+    /// Scan job status
+    pub scan_status: ProbeStatus,
+}
+
+impl DomainScanResult {
+    pub fn new() -> DomainScanResult {
+        DomainScanResult {
+            domains: vec![], 
+            scan_time: Duration::from_millis(0),
+            scan_status: ProbeStatus::Done,
+        }
+    }
+}

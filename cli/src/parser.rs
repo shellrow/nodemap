@@ -169,13 +169,9 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
             },
             Err(_) => {},
         }
-    }else if matches.contains_id("uri") {
-        opt.command_type = option::CommandType::UriScan;
-        let base_uri: &str = matches.value_of("base_uri").unwrap();
-        opt.targets.push(TargetInfo::new_with_base_uri(base_uri.to_string()));
     }else if matches.contains_id("domain") {
         opt.command_type = option::CommandType::DomainScan;
-        let base_domain: &str = matches.value_of("base_domain").unwrap();
+        let base_domain: &str = matches.value_of("domain").unwrap();
         opt.targets.push(TargetInfo::new_with_base_domain(base_domain.to_string()));
     }else if matches.contains_id("batch") {
         opt.command_type = option::CommandType::BatchScan;

@@ -76,7 +76,7 @@ fn main() {
             }
         },
         option::CommandType::DomainScan => {
-            
+            handler::handle_domain_scan(opt);
         },
         option::CommandType::UriScan => {
             
@@ -269,7 +269,7 @@ fn get_app_settings<'a>() -> Command<'a> {
             .long("acceptinvalidcerts")
             .takes_value(false)
         )
-        .group(ArgGroup::new("mode").args(&["port", "host", "ping", "trace", "uri", "domain", "batch", "passive"]))
+        .group(ArgGroup::new("mode").args(&["port", "host", "ping", "trace", "domain", "batch", "passive"]))
         .setting(AppSettings::DeriveDisplayOrder)
         ;
         app

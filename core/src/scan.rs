@@ -11,11 +11,10 @@ use netscan::async_io::{PortScanner as AsyncPortScanner, HostScanner as AsyncHos
 use netscan::os::{Fingerprinter, ProbeTarget, ProbeType, ProbeResult};
 use netscan::service::{ServiceDetector, PortDatabase};
 use domainscan::scanner::DomainScanner;
-use domainscan::result::DomainScanResult;
 use tracert::trace::Tracer;
 use tracert::ping::{Pinger};
 use crate::option::{TargetInfo, Protocol};
-use crate::result::{PortScanResult, HostScanResult, HostInfo, PingStat, PingResult, ProbeStatus, TraceResult, Node, NodeType};
+use crate::result::{PortScanResult, HostScanResult, HostInfo, PingStat, PingResult, ProbeStatus, TraceResult, Node, NodeType, Domain, DomainScanResult};
 use crate::model::TCPFingerprint;
 use crate::option::ScanOption;
 use crate::{define, network};
@@ -443,11 +442,14 @@ pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Domain
         for d in word_list{
             domain_scanner.add_word(d.to_string());
         }
+    }else{
+        domain_scanner.set_passive(true);
     }
     domain_scanner.set_timeout(opt.timeout);
     let rx = domain_scanner.get_progress_receiver();
+    let rt: tokio::runtime::Runtime = tokio::runtime::Runtime::new().unwrap();
     let handle = thread::spawn(move|| {
-        async_io::block_on(async {
+        rt.block_on(async {
             domain_scanner.scan().await
         })
     });
@@ -457,6 +459,20 @@ pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Domain
             Err(_) => {},
         }
     }
-    let result = handle.join().unwrap();
+    let domain_scna_result: domainscan::result::DomainScanResult = handle.join().unwrap();
+    let mut domains: Vec<Domain> = vec![];
+    for domain in domain_scna_result.domains {
+        domains.push(Domain { domain_name: domain.domain_name, ips: domain.ips });
+    }
+    let result: DomainScanResult = DomainScanResult { 
+        domains: domains, 
+        scan_time: domain_scna_result.scan_time, 
+        scan_status: match domain_scna_result.scan_status {
+            domainscan::result::ScanStatus::Done => ProbeStatus::Done,
+            domainscan::result::ScanStatus::Timeout => ProbeStatus::Timeout,
+            domainscan::result::ScanStatus::Error => ProbeStatus::Error,
+            _ => ProbeStatus::Done,
+        } 
+    };
     result
 }
