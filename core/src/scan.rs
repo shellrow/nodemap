@@ -446,6 +446,10 @@ pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Domain
         domain_scanner.set_passive(true);
     }
     domain_scanner.set_timeout(opt.timeout);
+    match msg_tx.send(String::from(define::MESSAGE_START_DOMAINSCAN)) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
     let rx = domain_scanner.get_progress_receiver();
     let rt: tokio::runtime::Runtime = tokio::runtime::Runtime::new().unwrap();
     let handle = thread::spawn(move|| {
@@ -460,6 +464,10 @@ pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Domain
         }
     }
     let domain_scna_result: domainscan::result::DomainScanResult = handle.join().unwrap();
+    match msg_tx.send(String::from(define::MESSAGE_END_DOMAINSCAN)) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
     let mut domains: Vec<Domain> = vec![];
     for domain in domain_scna_result.domains {
         domains.push(Domain { domain_name: domain.domain_name, ips: domain.ips });
