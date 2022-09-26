@@ -1,7 +1,7 @@
 use std::net::IpAddr;
 use std::sync::mpsc;
 use std::{thread, vec};
-use std::fs::{read, read_to_string};
+use std::fs::read_to_string;
 use std::collections::HashMap;
 use std::time::{Duration, Instant};
 use std::iter::Iterator;
@@ -10,9 +10,8 @@ use netscan::blocking::{PortScanner, HostScanner};
 use netscan::async_io::{PortScanner as AsyncPortScanner, HostScanner as AsyncHostScanner};
 use netscan::os::{Fingerprinter, ProbeTarget, ProbeType, ProbeResult};
 use netscan::service::{ServiceDetector, PortDatabase};
-use webscan::RequestMethod;
-use webscan::{UriScanner, DomainScanner};
-use webscan::{UriScanResult, DomainScanResult};
+use domainscan::scanner::DomainScanner;
+use domainscan::result::DomainScanResult;
 use tracert::trace::Tracer;
 use tracert::ping::{Pinger};
 use crate::option::{TargetInfo, Protocol};
@@ -425,57 +424,6 @@ pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceRe
         tracert::trace::TraceStatus::Timeout => ProbeStatus::Timeout,
     };
     result.probe_time = trace_result.probe_time;
-    result
-}
-
-pub async fn run_uri_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> UriScanResult {
-    let mut uri_scanner = match UriScanner::new(){
-        Ok(scanner) => (scanner),
-        Err(e) => panic!("Error creating scanner: {}", e),
-    };
-    uri_scanner.set_base_uri(opt.targets[0].base_uri.clone());
-    if opt.use_wordlist {
-        let data = read_to_string(opt.wordlist_path);
-        let text = match data {
-            Ok(content) => content,
-            Err(e) => {panic!("Could not open or find file: {}", e);}
-        };
-        let word_list: Vec<&str> = text.trim().split("\n").collect();
-        for word in word_list {
-            uri_scanner.add_word(word.to_string());
-        }
-    }
-    if opt.use_content {
-        match read(opt.content_path.to_string()) {
-            Ok(ct) => {
-                let sep = b'\n';
-                ct.split(|b| b == &sep )
-                    .for_each(|c| uri_scanner.add_content(c.to_vec()));
-            },
-            Err(e) => {panic!("Could not open or find content file {} due to {}", opt.content_path.to_string(), e);}
-        }
-    }
-    if !opt.request_method.is_empty() {
-        if opt.request_method.to_uppercase() == "POST" {
-            uri_scanner.set_request_method(RequestMethod::Post);
-        }else{
-            uri_scanner.set_request_method(RequestMethod::Get);
-        }
-    }
-    uri_scanner.set_timeout(opt.timeout);
-    let rx = uri_scanner.get_progress_receiver();
-    let handle = thread::spawn(move|| {
-        async_io::block_on(async {
-            uri_scanner.scan().await
-        })
-    });
-    while let Ok(uri) = rx.lock().unwrap().recv() {
-        match msg_tx.send(uri) {
-            Ok(_) => {},
-            Err(_) => {},
-        }
-    }
-    let result = handle.join().unwrap();
     result
 }
 

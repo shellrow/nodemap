@@ -12,4 +12,3 @@ pub const MESSAGE_END_ARPSCAN: &str = "END_ARPSCAN";
 
 // Passive Scan URL
 pub const URL_SHODAN: &str = "https://internetdb.shodan.io/";
-pub const URL_CRT: &str = "https://crt.sh/";

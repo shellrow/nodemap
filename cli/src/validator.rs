@@ -150,14 +150,6 @@ pub fn validate_protocol(v: &str) -> Result<(), String> {
     }
 }
 
-pub fn validate_uri_opt(v: &str) -> Result<(), String> {
-    let re = Regex::new(r"https?://[\w!\?/\+\-_~=;\.,\*&@#\$%\(\)'\[\]]+").unwrap();
-    if !re.is_match(&v) {
-        return Err(String::from("Please specify uri"));
-    }
-    Ok(())
-}
-
 pub fn validate_domain_opt(v: &str) -> Result<(), String> {
     let re = Regex::new(r"[\w\-._]+\.[A-Za-z]+").unwrap();
     if !re.is_match(&v) {
