@@ -4,6 +4,7 @@ use nodemap_core::result::{PingStat, TraceResult};
 use nodemap_core::{option, scan, result, define};
 use indicatif::{ProgressBar, ProgressStyle};
 use super::db;
+use super::output;
 
 fn get_spinner() -> ProgressBar {
     let pb = ProgressBar::new_spinner();
@@ -50,7 +51,7 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::PortScanResult = handle.join().unwrap();
-    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_portscan_result(result.clone());
 }
 
 pub async fn handle_host_scan(opt: option::ScanOption) {

@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use term_table::{Table, TableStyle};
 use term_table::table_cell::{TableCell,Alignment};
 use term_table::row::Row;
@@ -23,12 +21,12 @@ pub fn show_options(opt: ScanOption) {
         TableCell::new_with_alignment(opt.protocol.name(), 1, Alignment::Left)
     ]));
     table.add_row(Row::new(vec![
-        TableCell::new_with_alignment("\tInterface Index", 1, Alignment::Left),
-        TableCell::new_with_alignment(opt.interface_index, 1, Alignment::Left)
-    ]));
-    table.add_row(Row::new(vec![
         TableCell::new_with_alignment("\tInterface Name", 1, Alignment::Left),
         TableCell::new_with_alignment(opt.interface_name, 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tSource IP Address", 1, Alignment::Left),
+        TableCell::new_with_alignment(opt.src_ip, 1, Alignment::Left)
     ]));
     table.add_row(Row::new(vec![
         TableCell::new_with_alignment("\tTimeout(ms)", 1, Alignment::Left),
@@ -151,10 +149,90 @@ pub fn show_options(opt: ScanOption) {
     println!("{}", table.render());
 }
 
-pub fn show_portscan_result(_result: PortScanResult) {
-
+pub fn show_portscan_result(result: PortScanResult) {
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Scan Result:", 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Host Info:", 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tIP Address", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.ip_addr, 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tHost Name", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.host_name, 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tMAC Address", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.mac_addr , 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tVendor Info", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.vendor_info , 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tOS Name", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.os_name, 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tCPE", 1, Alignment::Left),
+        TableCell::new_with_alignment(result.host.cpe, 1, Alignment::Left)
+    ]));
+    println!("{}", table.render());
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Port Info:", 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tNumber", 1, Alignment::Left),
+        TableCell::new_with_alignment("Status", 1, Alignment::Left),
+        TableCell::new_with_alignment("Service Name", 1, Alignment::Left),
+        TableCell::new_with_alignment("Service Version", 1, Alignment::Left),
+    ]));
+    for port in result.ports {
+        table.add_row(Row::new(vec![
+            TableCell::new_with_alignment(format!("\t{}",port.port_number), 1, Alignment::Left),
+            TableCell::new_with_alignment(port.port_status, 1, Alignment::Left),
+            TableCell::new_with_alignment(port.service_name, 1, Alignment::Left),
+            TableCell::new_with_alignment(port.service_version, 1, Alignment::Left),
+        ]));
+    }
+    println!("{}", table.render());
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Performance:", 1, Alignment::Left)
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tPort Scan Time", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tService Detection Time", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.service_detection_time), 1, Alignment::Left),
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tOS Detection Time", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("\tTotal Scan Time", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
+    ]));
+    println!("{}", table.render());
 }
 
-pub fn show_hostscan_result(_result: HostScanResult) {
+pub fn show_hostscan_result(result: HostScanResult) {
 
 }
