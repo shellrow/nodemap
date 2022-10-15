@@ -6,6 +6,7 @@ mod validator;
 mod parser;
 mod db;
 mod handler;
+mod output;
 
 use std::env;
 use chrono::{Local, DateTime};
@@ -23,6 +24,7 @@ fn main() {
     let matches = app.get_matches();
     let opt: option::ScanOption = parser::parse_args(matches);
     show_banner_with_starttime();
+    output::show_options(opt.clone());
     match opt.command_type {
         option::CommandType::PortScan => {
             match opt.port_scan_type {
