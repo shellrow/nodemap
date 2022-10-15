@@ -89,6 +89,15 @@ pub enum ScanType {
 }
 
 impl ScanType {
+    pub fn name(&self) -> String {
+        match *self {
+            ScanType::TcpSynScan => String::from("TCP SYN Scan"),
+            ScanType::TcpConnectScan => String::from("TCP Connect Scan"),
+            ScanType::IcmpPingScan => String::from("ICMP Ping Scan"),
+            ScanType::TcpPingScan => String::from("TCP Ping Scan"),
+            ScanType::UdpPingScan => String::from("UDP Ping Scan"), 
+        }
+    }
     pub fn to_netscan_type(&self) -> netscan::setting::ScanType {
         match *self {
             ScanType::TcpSynScan => netscan::setting::ScanType::TcpSynScan,
