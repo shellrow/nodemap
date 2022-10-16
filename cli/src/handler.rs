@@ -29,10 +29,11 @@ fn get_spinner() -> ProgressBar {
 }
 
 pub async fn handle_port_scan(opt: option::ScanOption) {
+    let probe_opt: option::ScanOption = opt.clone();
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
     let handle = thread::spawn(move|| {
         async_io::block_on(async {
-            scan::run_service_scan(opt, &msg_tx).await
+            scan::run_service_scan(probe_opt, &msg_tx).await
         })
     });
     let mut pb = get_spinner();
@@ -51,18 +52,23 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::PortScanResult = handle.join().unwrap();
-    output::show_portscan_result(result);
-    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_portscan_result(result.clone());
+
+    if !opt.save_file_path.is_empty() {
+        output::save_json(serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")), opt.save_file_path.clone());
+        println!("Probe result saved to: {}", opt.save_file_path);
+    }
+
 }
 
 pub async fn handle_host_scan(opt: option::ScanOption) {
-    let mut opt: option::ScanOption = opt;
-    opt.oui_map = db::get_oui_map();
-    opt.ttl_map = db::get_os_ttl();
+    let mut probe_opt: option::ScanOption = opt.clone();
+    probe_opt.oui_map = db::get_oui_map();
+    probe_opt.ttl_map = db::get_os_ttl();
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
     let handle = thread::spawn(move|| {
         async_io::block_on(async {
-            scan::run_node_scan(opt, &msg_tx).await
+            scan::run_node_scan(probe_opt, &msg_tx).await
         })
     });
     let mut pb = get_spinner();
@@ -79,13 +85,18 @@ pub async fn handle_host_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::HostScanResult = handle.join().unwrap();
-    output::show_hostscan_result(result);
-    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_hostscan_result(result.clone());
+
+    if !opt.save_file_path.is_empty() {
+        output::save_json(serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")), opt.save_file_path.clone());
+        println!("Probe result saved to: {}", opt.save_file_path);
+    }
+
 }
 
 pub fn handle_ping(opt: option::ScanOption) {    
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
-    let ping_opt = opt.clone();
+    let ping_opt: option::ScanOption = opt.clone();
     let handle = thread::spawn(move||{
         scan::run_ping(ping_opt, &msg_tx)
     });
@@ -93,27 +104,39 @@ pub fn handle_ping(opt: option::ScanOption) {
         println!("{}", msg);
     }
     let result: PingStat = handle.join().unwrap();
-    output::show_ping_result(result);
-    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_ping_result(result.clone());
+
+    if !opt.save_file_path.is_empty() {
+        output::save_json(serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")), opt.save_file_path.clone());
+        println!("Probe result saved to: {}", opt.save_file_path);
+    }
+
 }
 
 pub fn handle_trace(opt: option::ScanOption) {
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let trace_opt: option::ScanOption = opt.clone();
     let handle = thread::spawn(move||{
-        scan::run_traceroute(opt, &msg_tx)
+        scan::run_traceroute(trace_opt, &msg_tx)
     });
     while let Ok(msg) = msg_rx.recv() {
         println!("{}", msg);
     }
     let result: TraceResult = handle.join().unwrap();
-    output::show_trace_result(result);
-    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_trace_result(result.clone());
+
+    if !opt.save_file_path.is_empty() {
+        output::save_json(serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")), opt.save_file_path.clone());
+        println!("Probe result saved to: {}", opt.save_file_path);
+    }
+
 }
 
 pub fn handle_domain_scan(opt: option::ScanOption) {
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let probe_opt: option::ScanOption = opt.clone();
     let handle = thread::spawn(move||{
-        scan::run_domain_scan(opt, &msg_tx)
+        scan::run_domain_scan(probe_opt, &msg_tx)
     });
     let mut pb = get_spinner();
     while let Ok(msg) = msg_rx.recv() {
@@ -127,6 +150,11 @@ pub fn handle_domain_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::DomainScanResult = handle.join().unwrap();
-    output::show_domainscan_result(result);
-    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_domainscan_result(result.clone());
+
+    if !opt.save_file_path.is_empty() {
+        output::save_json(serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")), opt.save_file_path.clone());
+        println!("Probe result saved to: {}", opt.save_file_path);
+    }
+
 }

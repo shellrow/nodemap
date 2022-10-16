@@ -1,3 +1,4 @@
+use std::fs;
 use term_table::{Table, TableStyle};
 use term_table::table_cell::{TableCell,Alignment};
 use term_table::row::Row;
@@ -406,4 +407,11 @@ pub fn show_domainscan_result(result: DomainScanResult) {
     println!("{}", table.render());
     println!("Scan Time: {:?}", result.scan_time);
     println!();
+}
+
+pub fn save_json(json: String, file_path: String) -> bool {
+    match fs::write(file_path, json) {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }
