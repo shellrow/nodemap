@@ -80,9 +80,6 @@ fn main() {
         option::CommandType::DomainScan => {
             handler::handle_domain_scan(opt);
         },
-        option::CommandType::UriScan => {
-            
-        },
         option::CommandType::BatchScan => {
             
         },
@@ -138,21 +135,21 @@ fn get_app_settings<'a>() -> Command<'a> {
             .value_name("target")
             .validator(validator::validate_domain_opt)
         )
-        .arg(Arg::new("batch")
+       /*  .arg(Arg::new("batch")
             .help("Batch scan with config. \nExamples: \n--batch <path_to_config_file>")
             .short('b')
             .long("batch")
             .takes_value(true)
             .value_name("target")
             .validator(validator::validate_filepath)
-        )
-        .arg(Arg::new("passive")
+        ) */
+        /* .arg(Arg::new("passive")
             .help("Passive scan. \nExamples: \n--passive shodan")
             .long("passive")
             .takes_value(true)
             .value_name("target")
             .validator(validator::validate_domain_opt)
-        )
+        ) */
         .arg(Arg::new("interface")
             .help("Specify the network interface")
             .short('i')
@@ -271,7 +268,7 @@ fn get_app_settings<'a>() -> Command<'a> {
             .long("acceptinvalidcerts")
             .takes_value(false)
         )
-        .group(ArgGroup::new("mode").args(&["port", "host", "ping", "trace", "domain", "batch", "passive"]))
+        .group(ArgGroup::new("mode").args(&["port", "host", "ping", "trace", "domain"]))
         .setting(AppSettings::DeriveDisplayOrder)
         ;
         app
@@ -292,7 +289,7 @@ fn show_banner_with_starttime() {
     println!("{}", define::CRATE_REPOSITORY);
     println!();
     let local_datetime: DateTime<Local> = Local::now();
-    println!("Scan started at {}", local_datetime);
+    println!("Probe started at {}", local_datetime);
     println!();
 }
 
