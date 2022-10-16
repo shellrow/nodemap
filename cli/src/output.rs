@@ -75,11 +75,11 @@ pub fn show_options(opt: ScanOption) {
         },
         CommandType::HostScan => {
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tScan Type", 1, Alignment::Left),
-                TableCell::new_with_alignment(opt.port_scan_type.name(), 1, Alignment::Left)
+                TableCell::new_with_alignment("Scan Type", 1, Alignment::Left),
+                TableCell::new_with_alignment(opt.host_scan_type.name(), 1, Alignment::Left)
             ]));
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tAsync", 1, Alignment::Left),
+                TableCell::new_with_alignment("Async", 1, Alignment::Left),
                 if opt.async_scan {
                     TableCell::new_with_alignment("True", 1, Alignment::Left)
                 }else{
@@ -87,7 +87,7 @@ pub fn show_options(opt: ScanOption) {
                 }
             ]));
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tSend Rate(ms)", 1, Alignment::Left),
+                TableCell::new_with_alignment("Send Rate(ms)", 1, Alignment::Left),
                 TableCell::new_with_alignment(opt.send_rate.as_millis(), 1, Alignment::Left)
             ]));
             println!("{}", table.render());
@@ -97,22 +97,22 @@ pub fn show_options(opt: ScanOption) {
             table.style = TableStyle::blank();
             println!("Target:");
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tHost", 1, Alignment::Left),
+                TableCell::new_with_alignment("Host", 1, Alignment::Left),
                 TableCell::new_with_alignment(format!("{} host(s)", opt.targets.len()), 1, Alignment::Left)
             ]));
             println!("{}", table.render());
         },
         CommandType::Ping => {
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tPing Type", 1, Alignment::Left),
+                TableCell::new_with_alignment("Ping Type", 1, Alignment::Left),
                 TableCell::new_with_alignment(opt.ping_type.name(), 1, Alignment::Left)
             ]));
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tCount", 1, Alignment::Left),
+                TableCell::new_with_alignment("Count", 1, Alignment::Left),
                 TableCell::new_with_alignment(opt.count, 1, Alignment::Left)
             ]));
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tSend Rate(ms)", 1, Alignment::Left),
+                TableCell::new_with_alignment("Send Rate(ms)", 1, Alignment::Left),
                 TableCell::new_with_alignment(opt.send_rate.as_millis(), 1, Alignment::Left)
             ]));
             println!("{}", table.render());
@@ -123,7 +123,7 @@ pub fn show_options(opt: ScanOption) {
             println!("Target:");
             for target in opt.targets {
                 table.add_row(Row::new(vec![
-                    TableCell::new_with_alignment("\tHost", 1, Alignment::Left),
+                    TableCell::new_with_alignment("Host", 1, Alignment::Left),
                     TableCell::new_with_alignment(target.ip_addr, 1, Alignment::Left)
                 ]));
             }
@@ -131,7 +131,7 @@ pub fn show_options(opt: ScanOption) {
         },
         CommandType::Traceroute => {
             table.add_row(Row::new(vec![
-                TableCell::new_with_alignment("\tMax Hop", 1, Alignment::Left),
+                TableCell::new_with_alignment("Max Hop", 1, Alignment::Left),
                 TableCell::new_with_alignment(opt.max_hop, 1, Alignment::Left)
             ]));
             println!("{}", table.render());
@@ -142,17 +142,16 @@ pub fn show_options(opt: ScanOption) {
             println!("Target:");
             for target in opt.targets {
                 table.add_row(Row::new(vec![
-                    TableCell::new_with_alignment("\tHost", 1, Alignment::Left),
+                    TableCell::new_with_alignment("Host", 1, Alignment::Left),
                     TableCell::new_with_alignment(target.ip_addr, 1, Alignment::Left)
                 ]));
             }
             println!("{}", table.render());
         },
-        CommandType::UriScan => {},
         CommandType::DomainScan => {
             if opt.use_wordlist {
                 table.add_row(Row::new(vec![
-                    TableCell::new_with_alignment("\tWord List", 1, Alignment::Left),
+                    TableCell::new_with_alignment("Word List", 1, Alignment::Left),
                     TableCell::new_with_alignment(opt.wordlist_path, 1, Alignment::Left)
                 ]));
             }
@@ -164,7 +163,7 @@ pub fn show_options(opt: ScanOption) {
             println!("Target:");
             for target in opt.targets {
                 table.add_row(Row::new(vec![
-                    TableCell::new_with_alignment("\tDomain", 1, Alignment::Left),
+                    TableCell::new_with_alignment("Domain", 1, Alignment::Left),
                     TableCell::new_with_alignment(target.base_domain, 1, Alignment::Left)
                 ]));
             }
@@ -375,8 +374,8 @@ pub fn show_trace_result(result: TraceResult) {
             TableCell::new_with_alignment(node.ip_addr, 1, Alignment::Left),
             TableCell::new_with_alignment(node.host_name, 1, Alignment::Left),
             TableCell::new_with_alignment(format!("{:?}", node.node_type), 1, Alignment::Left),
-            TableCell::new_with_alignment(format!("{:?}", node.ttl), 1, Alignment::Left),
-            TableCell::new_with_alignment(format!("{:?}", node.hop), 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.ttl.unwrap_or(0)), 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.hop.unwrap_or(0)), 1, Alignment::Left),
             TableCell::new_with_alignment(format!("{:?}", node.rtt), 1, Alignment::Left),
         ]));
     }
