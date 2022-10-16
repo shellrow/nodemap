@@ -338,6 +338,8 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
             pinger.dst_port = opt.targets[0].ports[0];
         },
     }
+    pinger.count = opt.count as u8;
+    pinger.set_ping_timeout(opt.timeout);
     let rx = pinger.get_progress_receiver();
     let handle = thread::spawn(move|| {
         pinger.ping()
@@ -388,7 +390,8 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
 }
 
 pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceResult {
-    let tracer: Tracer = Tracer::new(opt.targets[0].ip_addr).unwrap();
+    let mut tracer: Tracer = Tracer::new(opt.targets[0].ip_addr).unwrap();
+    tracer.set_trace_timeout(opt.timeout);
     let rx = tracer.get_progress_receiver();
     let handle = thread::spawn(move|| {
         tracer.trace()
