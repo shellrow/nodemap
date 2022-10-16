@@ -106,7 +106,8 @@ pub fn handle_trace(opt: option::ScanOption) {
         println!("{}", msg);
     }
     let result: TraceResult = handle.join().unwrap();
-    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_trace_result(result);
+    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
 pub fn handle_domain_scan(opt: option::ScanOption) {
@@ -126,5 +127,6 @@ pub fn handle_domain_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::DomainScanResult = handle.join().unwrap();
-    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_domainscan_result(result);
+    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }

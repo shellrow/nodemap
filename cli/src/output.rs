@@ -142,6 +142,15 @@ pub fn show_options(opt: ScanOption) {
                     TableCell::new_with_alignment(opt.wordlist_path, 1, Alignment::Left)
                 ]));
             }
+            table.add_row(Row::new(vec![
+                TableCell::new_with_alignment("Target:", 1, Alignment::Left)
+            ]));
+            for target in opt.targets {
+                table.add_row(Row::new(vec![
+                    TableCell::new_with_alignment("\tDomain", 1, Alignment::Left),
+                    TableCell::new_with_alignment(target.base_domain, 1, Alignment::Left)
+                ]));
+            }
         },
         CommandType::BatchScan => {},
         CommandType::PassiveScan => {},
@@ -287,9 +296,11 @@ pub fn show_ping_result(result: PingStat) {
     table.max_column_width = 60;
     table.separate_rows = false;
     table.style = TableStyle::blank();
-    table.add_row(Row::new(vec![
+    /* table.add_row(Row::new(vec![
         TableCell::new_with_alignment("Ping Result:", 1, Alignment::Left)
-    ]));
+    ])); */
+    println!();
+    println!("Ping Result:");
     table.add_row(Row::new(vec![
         TableCell::new_with_alignment("SEQ", 1, Alignment::Left),
         TableCell::new_with_alignment("Protocol", 1, Alignment::Left),
@@ -342,9 +353,74 @@ pub fn show_ping_result(result: PingStat) {
 }
 
 pub fn show_trace_result(result: TraceResult) {
-
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    /* table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Trace Result:", 1, Alignment::Left)
+    ])); */
+    println!();
+    println!("Trace Result:");
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("SEQ", 1, Alignment::Left),
+        TableCell::new_with_alignment("IP Address", 1, Alignment::Left),
+        TableCell::new_with_alignment("Host Name", 1, Alignment::Left),
+        TableCell::new_with_alignment("Node Type", 1, Alignment::Left),
+        TableCell::new_with_alignment("TTL", 1, Alignment::Left),
+        TableCell::new_with_alignment("Hop", 1, Alignment::Left),
+        TableCell::new_with_alignment("RTT", 1, Alignment::Left),
+    ]));
+    for node in result.nodes {
+        table.add_row(Row::new(vec![
+            TableCell::new_with_alignment(node.seq, 1, Alignment::Left),
+            TableCell::new_with_alignment(node.ip_addr, 1, Alignment::Left),
+            TableCell::new_with_alignment(node.host_name, 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.node_type), 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.ttl), 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.hop), 1, Alignment::Left),
+            TableCell::new_with_alignment(format!("{:?}", node.rtt), 1, Alignment::Left),
+        ]));
+    }
+    println!("{}", table.render());
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Probe Time:", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.probe_time), 1, Alignment::Left),
+    ]));
+    println!("{}", table.render());
 }
 
 pub fn show_domainscan_result(result: DomainScanResult) {
-
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    println!();
+    println!("Scan Result:");
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Domain Name", 1, Alignment::Left),
+        TableCell::new_with_alignment("IP Address", 1, Alignment::Left),
+    ]));
+    for domain in result.domains {
+        for ip in domain.ips {
+            table.add_row(Row::new(vec![
+                TableCell::new_with_alignment(domain.domain_name.clone(), 1, Alignment::Left),
+                TableCell::new_with_alignment(ip, 1, Alignment::Left),
+            ]));
+        }
+    }
+    println!("{}", table.render());
+    let mut table = Table::new();
+    table.max_column_width = 60;
+    table.separate_rows = false;
+    table.style = TableStyle::blank();
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Scan Time:", 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.scan_time), 1, Alignment::Left),
+    ]));
+    println!("{}", table.render());
 }
