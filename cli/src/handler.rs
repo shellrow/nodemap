@@ -51,7 +51,8 @@ pub async fn handle_port_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::PortScanResult = handle.join().unwrap();
-    output::show_portscan_result(result.clone());
+    output::show_portscan_result(result);
+    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
 pub async fn handle_host_scan(opt: option::ScanOption) {
@@ -78,7 +79,8 @@ pub async fn handle_host_scan(opt: option::ScanOption) {
     }
     pb.finish_and_clear();
     let result: result::HostScanResult = handle.join().unwrap();
-    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_hostscan_result(result);
+    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
 pub fn handle_ping(opt: option::ScanOption) {    
@@ -91,7 +93,8 @@ pub fn handle_ping(opt: option::ScanOption) {
         println!("{}", msg);
     }
     let result: PingStat = handle.join().unwrap();
-    println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
+    output::show_ping_result(result);
+    //println!("{}", serde_json::to_string_pretty(&result).unwrap_or(String::from("Serialize Error")));
 }
 
 pub fn handle_trace(opt: option::ScanOption) {
