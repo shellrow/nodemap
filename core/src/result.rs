@@ -124,7 +124,7 @@ impl PortScanResult {
 pub struct HostScanResult {
     pub hosts: Vec<HostInfo>,
     pub host_scan_time: Duration,
-    pub os_detection_time: Duration,
+    pub lookup_time: Duration,
     pub total_scan_time: Duration,
 }
 
@@ -133,7 +133,7 @@ impl HostScanResult {
         HostScanResult { 
             hosts: vec![], 
             host_scan_time: Duration::from_millis(0), 
-            os_detection_time: Duration::from_millis(0), 
+            lookup_time: Duration::from_millis(0), 
             total_scan_time: Duration::from_millis(0),
         }
     }
