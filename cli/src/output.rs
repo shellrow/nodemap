@@ -249,19 +249,15 @@ pub fn show_portscan_result(result: PortScanResult) {
     println!("Performance:");
     table.add_row(Row::new(vec![
         TableCell::new_with_alignment("Port Scan Time", 1, Alignment::Left),
-        TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
-    ]));
-    table.add_row(Row::new(vec![
         TableCell::new_with_alignment("Service Detection Time", 1, Alignment::Left),
-        TableCell::new_with_alignment(format!("{:?}", result.service_detection_time), 1, Alignment::Left),
-    ]));
-    table.add_row(Row::new(vec![
         TableCell::new_with_alignment("OS Detection Time", 1, Alignment::Left),
-        TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
+        TableCell::new_with_alignment("Total Scan Time", 1, Alignment::Left),
     ]));
     table.add_row(Row::new(vec![
-        TableCell::new_with_alignment("Total Scan Time", 1, Alignment::Left),
         TableCell::new_with_alignment(format!("{:?}", result.port_scan_time), 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.service_detection_time), 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.os_detection_time), 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.total_scan_time), 1, Alignment::Left),
     ]));
     println!("{}", table.render());
 }
@@ -297,14 +293,12 @@ pub fn show_hostscan_result(result: HostScanResult) {
     println!("Performance:");
     table.add_row(Row::new(vec![
         TableCell::new_with_alignment("Host Scan Time", 1, Alignment::Left),
-        TableCell::new_with_alignment(format!("{:?}", result.host_scan_time), 1, Alignment::Left),
-    ]));
-    table.add_row(Row::new(vec![
-        TableCell::new_with_alignment("OS Detection Time", 1, Alignment::Left),
-        TableCell::new_with_alignment(format!("{:?}", result.os_detection_time), 1, Alignment::Left),
-    ]));
-    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment("Lookup Time", 1, Alignment::Left),
         TableCell::new_with_alignment("Total Scan Time", 1, Alignment::Left),
+    ]));
+    table.add_row(Row::new(vec![
+        TableCell::new_with_alignment(format!("{:?}", result.host_scan_time), 1, Alignment::Left),
+        TableCell::new_with_alignment(format!("{:?}", result.lookup_time), 1, Alignment::Left),
         TableCell::new_with_alignment(format!("{:?}", result.total_scan_time), 1, Alignment::Left),
     ]));
     println!("{}", table.render());
