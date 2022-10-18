@@ -280,25 +280,18 @@ pub async fn run_node_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Ho
         Err(_) => {},
     }
     // Get MAC Addresses (LAN only)
+    let start_time: Instant = Instant::now();
     let mut arp_targets: Vec<IpAddr> = vec![];
     for host in hs_result.get_hosts() {
         if network::in_same_network(opt.src_ip, host) {
             arp_targets.push(host);
         }
     }
-    if arp_targets.len() > 0 {
-        match msg_tx.send(String::from(define::MESSAGE_START_ARPSCAN)) {
-            Ok(_) => {},
-            Err(_) => {},
-        }
+    match msg_tx.send(String::from(define::MESSAGE_START_LOOKUP)) {
+        Ok(_) => {},
+        Err(_) => {},
     }
     let mac_map: HashMap<IpAddr, String> = network::get_mac_addresses(arp_targets.clone(), opt.src_ip);
-    if arp_targets.len() > 0 {
-        match msg_tx.send(String::from(define::MESSAGE_END_ARPSCAN)) {
-            Ok(_) => {},
-            Err(_) => {},
-        }
-    }
     for host in hs_result.hosts {
         let host_info = HostInfo {
             ip_addr: host.ip_addr.to_string(),
@@ -317,6 +310,14 @@ pub async fn run_node_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Ho
         };
         result.hosts.push(host_info);
     }
+    match msg_tx.send(String::from(define::MESSAGE_END_LOOKUP)) {
+        Ok(_) => {},
+        Err(_) => {},
+    }
+    let lookup_time:Duration = Instant::now().duration_since(start_time);
+    result.host_scan_time = hs_result.scan_time;
+    result.lookup_time = lookup_time;
+    result.total_scan_time = result.host_scan_time + result.lookup_time;
     return result;
 }
 
