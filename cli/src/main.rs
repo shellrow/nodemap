@@ -2,7 +2,6 @@
 extern crate clap;
 
 mod define;
-mod validator;
 mod parser;
 mod db;
 mod handler;
@@ -12,7 +11,7 @@ use std::env;
 use chrono::{Local, DateTime};
 use clap::{Command, AppSettings, Arg, App, ArgGroup};
 
-use nodemap_core::{option, process, sys};
+use nodemap_core::{option, process, sys, validator};
 
 fn main() {
     let args: Vec<String> = env::args().collect();

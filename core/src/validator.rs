@@ -3,7 +3,7 @@ use std::str::FromStr;
 use std::net::{IpAddr, SocketAddr};
 use std::path::Path;
 use dns_lookup::lookup_host;
-use nodemap_core::network;
+use crate::network;
 
 pub fn validate_port_opt(v: &str) -> Result<(), String> {
     let re_addr_range = Regex::new(r"\S+:\d+-\d+$").unwrap();

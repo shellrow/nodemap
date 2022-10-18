@@ -7,3 +7,4 @@ pub mod network;
 pub mod scan;
 pub mod model;
 pub mod define;
+pub mod validator;
