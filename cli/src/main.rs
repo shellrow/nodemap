@@ -109,7 +109,7 @@ fn get_app_settings<'a>() -> Command<'a> {
             .long("host")
             .takes_value(true)
             .value_name("target")
-            .validator(validator::validate_host_opt)
+            .validator(validator::validate_hostscan_opt)
         )
         .arg(Arg::new("ping")
             .help("Ping to specified host. \nExamples: \n--ping 192.168.1.8 -c 4")

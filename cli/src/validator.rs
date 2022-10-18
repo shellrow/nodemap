@@ -46,7 +46,7 @@ pub fn validate_port_opt(v: &str) -> Result<(), String> {
     }
 } */
 
-pub fn validate_host_opt(v: &str) -> Result<(), String> {
+pub fn validate_hostscan_opt(v: &str) -> Result<(), String> {
     let re_host = Regex::new(r"[\w\-._]+\.[A-Za-z]+").unwrap();
     if Path::new(&v).exists() {
         return Ok(());
@@ -71,6 +71,18 @@ pub fn validate_host_opt(v: &str) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+pub fn validate_host_opt(v: &str) -> Result<(), String> {
+    if is_ipaddr(v.to_string()){
+        return Ok(());
+    }else{
+        if is_valid_hostname(v.to_string()) {
+            return Ok(());
+        }else{
+            return Err(String::from("Please specify ip address or host name"));
+        }
+    }
 }
 
 /* pub fn validate_domain_opt(v: String) -> Result<(), String> {
@@ -202,4 +214,15 @@ pub fn is_socketaddr(host: String) -> bool {
             return false;
         }
     }
+}
+
+pub fn is_valid_hostname(host: String) -> bool {
+    match dns_lookup::lookup_host(&host) {
+        Ok(_) => {
+            return true;
+        },
+        Err(_) => {
+            return false;
+        }
+    } 
 }
