@@ -156,7 +156,19 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
                     Ok(socket_addr) => {
                         opt.targets.push(TargetInfo::new_with_socket(socket_addr.ip(), socket_addr.port()));
                     },
-                    Err(_) => {},
+                    Err(_) => {
+                        match dns_lookup::lookup_host(target) {
+                            Ok(ips) => {
+                                for ip in ips {
+                                    if ip.is_ipv4() {
+                                        opt.targets.push(TargetInfo::new_with_ip_addr(ip));
+                                        break;
+                                    }
+                                }
+                            },
+                            Err(_) => {},
+                        }
+                    },
                 }
             },
         }
@@ -168,7 +180,19 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
             Ok(ip) => {
                 opt.targets.push(TargetInfo::new_with_ip_addr(ip));
             },
-            Err(_) => {},
+            Err(_) => {
+                match dns_lookup::lookup_host(target) {
+                    Ok(ips) => {
+                        for ip in ips {
+                            if ip.is_ipv4() {
+                                opt.targets.push(TargetInfo::new_with_ip_addr(ip));
+                                break;
+                            }
+                        }
+                    },
+                    Err(_) => {},
+                }
+            },
         }
     }else if matches.contains_id("domain") {
         opt.command_type = option::CommandType::DomainScan;
