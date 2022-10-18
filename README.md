@@ -22,5 +22,5 @@ Under development.
 
 ## Supported platforms
 - Linux
-- macOS (OS X)
+- macOS
 - Windows
