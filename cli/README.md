@@ -1,4 +1,9 @@
-# nodemap
+[crates-badge]: https://img.shields.io/crates/v/nodemap.svg
+[crates-url]: https://crates.io/crates/nodemap
+[license-badge]: https://img.shields.io/crates/l/nodemap.svg
+[nodemap-url]: https://github.com/shellrow/nodemap
+
+# nodemap [![Crates.io][crates-badge]][crates-url] ![License][license-badge]
 Cross-platform network mapper
 
 ## Features
