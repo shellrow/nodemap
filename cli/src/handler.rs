@@ -77,8 +77,8 @@ pub async fn handle_host_scan(opt: option::ScanOption) {
             match msg.as_str() {
                 define::MESSAGE_START_HOSTSCAN => {pb.set_message("Scanning hosts ...");},
                 define::MESSAGE_END_HOSTSCAN => {pb.finish_with_message("Host scan"); pb = get_spinner();},
-                define::MESSAGE_START_ARPSCAN => {pb.set_message("ARP scan ...");},
-                define::MESSAGE_END_ARPSCAN => {pb.finish_with_message("ARP scan"); pb = get_spinner();},
+                define::MESSAGE_START_LOOKUP => {pb.set_message("Lookup ...");},
+                define::MESSAGE_END_LOOKUP => {pb.finish_with_message("Lookup"); pb = get_spinner();},
                 _ => {},
             }
         }
