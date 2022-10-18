@@ -1,6 +1,6 @@
 [package]
 name = "nodemap"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 authors = ["shellrow <shellrow@protonmail.com>"]
 description = "Cross-platform network mapper"
@@ -24,4 +24,4 @@ async-io = "1.6"
 chrono = "0.4"
 regex = "1.6.0"
 dns-lookup = "1.0"
-nodemap-core = { path = "../core", version = "0.2.0"}
+nodemap-core = { path = "../core", version = "0.2.1"}
