@@ -270,15 +270,15 @@ pub fn parse_args(matches: ArgMatches) -> option::ScanOption {
         }
     }
     if matches.contains_id("timeout") {
-        let v_timeout: u64 = *matches.get_one::<u64>("timeout").unwrap();
+        let v_timeout: u64 = matches.get_one::<String>("timeout").unwrap().parse::<u64>().unwrap();
         opt.timeout = Duration::from_millis(v_timeout);
     }
     if matches.contains_id("waittime") {
-        let v_waittime: u64 = *matches.get_one::<u64>("waittime").unwrap();
+        let v_waittime: u64 = matches.get_one::<String>("waittime").unwrap().parse::<u64>().unwrap();
         opt.wait_time = Duration::from_millis(v_waittime);
     }
     if matches.contains_id("rate") {
-        let v_rate: u64 = *matches.get_one::<u64>("rate").unwrap();
+        let v_rate: u64 = matches.get_one::<String>("rate").unwrap().parse::<u64>().unwrap();
         opt.send_rate = Duration::from_millis(v_rate);
     }
     if matches.contains_id("count") {
