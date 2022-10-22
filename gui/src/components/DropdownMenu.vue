@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { UserIcon, LogoutIcon } from '@heroicons/vue/outline';
+import { FingerPrintIcon, CogIcon} from '@heroicons/vue/outline';
 
 const show = ref(false);
 const root = ref(null);
@@ -28,14 +28,14 @@ onUnmounted(() => document.removeEventListener('click', clickOutside));
             <ul>
                 <li class="text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-600 p-2">
                 <router-link to="/profile" class="flex items-center space-x-2">
-                    <UserIcon class="w-5 h-5" />
-                    <span class="text-sm font-bold">Profile</span>
+                    <FingerPrintIcon class="w-5 h-5" />
+                    <span class="text-sm font-bold">System Info</span>
                 </router-link>
                 </li>
                 <li class="text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-600 p-2">
                     <a href="/#" class="flex items-center space-x-2">
-                        <LogoutIcon class="w-5 h-5" />
-                        <span class="text-sm font-bold">Logout</span>
+                        <CogIcon class="w-5 h-5" />
+                        <span class="text-sm font-bold">Setting</span>
                     </a>
                 </li>
             </ul>

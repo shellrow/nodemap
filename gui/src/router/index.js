@@ -6,12 +6,13 @@ import HostScan from '../pages/HostScan.vue';
 import Ping from '../pages/Ping.vue';
 import Traceroute from '../pages/Traceroute.vue';
 import Log from '../pages/Log.vue';
+import Network from '../pages/Network.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Dashboard',
-    component: Dashboard,
+    component: Network,
   },
   {
     path: '/profile',

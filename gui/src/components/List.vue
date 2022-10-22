@@ -11,7 +11,7 @@ import {
 
 const lists = reactive([
   {
-    name: 'Dashboard',
+    name: 'Map',
     icon: 'TemplateIcon',
     link: '/',
   },
