@@ -4,18 +4,13 @@ import { MenuIcon, MoonIcon, SunIcon } from '@heroicons/vue/outline';
 import { debounce } from 'lodash';
 import DropdownMenu from '../components/DropdownMenu.vue';
 import Sidebar from '../components/Sidebar.vue';
+import { themeChange } from 'theme-change';
+import { useRouter } from 'vue-router';
 
 const innerWidth = ref(window.innerWidth);
 const show = ref(innerWidth.value >= 1280 ? true : false);
-const theme = ref('light');
-
-if (localStorage.theme === 'dark') {
-  document.documentElement.classList.add('dark');
-  theme.value = 'dark';
-} else {
-  document.documentElement.classList.remove('dark');
-  theme.value = 'light';
-}
+//const theme = ref('light');
+const router = useRouter();
 
 const checkWindowSize = () => {
   if (window.innerWidth >= 1280) {
@@ -26,16 +21,13 @@ const checkWindowSize = () => {
   innerWidth.value = window.innerWidth;
 };
 
-const changeMode = (mode) => {
-  theme.value = mode;
-  theme.value === 'light'
-    ? document.documentElement.classList.remove('dark')
-    : document.documentElement.classList.add('dark');
-  localStorage.theme = mode;
+const changeMode = (event) => {
+  router.go(router.currentRoute);
 };
 
 onMounted(() => {
   window.addEventListener('resize', debounce(checkWindowSize, 100));
+  themeChange(false);
 });
 onUnmounted(() => {
   window.removeEventListener('resize', checkWindowSize);
@@ -50,12 +42,11 @@ onUnmounted(() => {
         top-0
         w-64
         h-screen
-        bg-white
-        dark:bg-gray-800
+        bg-base-200 
         z-20
         transform
         duration-300
-        dark:text-gray-300
+        text-base-content
       "
       :class="{ '-translate-x-full': !show }"
     >
@@ -67,31 +58,40 @@ onUnmounted(() => {
     v-show="show"
     ></div>
     <div
-    class="bg-gray-100 dark:bg-gray-900 h-screen overflow-hidden duration-300"
+    class="bg-base-100 h-screen overflow-hidden duration-300"
     :class="{ 'xl:pl-64': show }"
     >
     <div
-  class="flex items-center justify-between bg-white dark:bg-gray-800 rounded shadow m-4 p-4"
+  class="flex items-center justify-between bg-base-200 rounded shadow m-4 p-4"
 >
   <MenuIcon
-    class="h-6 w-6 text-gray-600 dark:text-gray-300 cursor-pointer"
+    class="h-6 w-6 text-base-content cursor-pointer"
     @click="show = !show"
   />
 <div class="flex items-center space-x-4">
-  <MoonIcon
-    class="w-7 h-7 text-gray-600 cursor-pointer"
+  <select class="select select-primary" data-choose-theme @change="changeMode">
+    <option disabled selected>Select Theme</option>
+    <option value="">Default</option>
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+    <option value="night">Night</option>
+    <option value="dracula">Dracula</option>
+    <option value="halloween">Halloween</option>
+  </select>
+<!--   <MoonIcon
+    class="w-7 h-7 text-base-content cursor-pointer"
     @click="changeMode('dark')"
     v-if="theme === 'light'"
   />
   <SunIcon
-    class="w-7 h-7 text-gray-300 cursor-pointer"
+    class="w-7 h-7 text-base-content cursor-pointer"
     @click="changeMode('light')"
     v-else
-  />
+  /> -->
   <DropdownMenu />
 </div>
 </div>
-    <div class="dark:text-gray-300">
+    <div class="text-base-content">
         <slot />
     </div>
     </div>

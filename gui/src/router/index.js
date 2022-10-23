@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Dashboard from '../pages/Dashboard.vue';
+//import Dashboard from '../pages/Dashboard.vue';
 import Profile from '../pages/Profile.vue';
 import PortScan from '../pages/PortScan.vue';
 import HostScan from '../pages/HostScan.vue';

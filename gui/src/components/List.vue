@@ -89,13 +89,13 @@ const currentRoute = computed(() => {
 </style>
 
 <template>
-<ul class="text-gray-700 dark:text-gray-300">
+<ul class="text-base-content">
     <li class="mb-1" v-for="list in lists" :key="list.name">
-      <router-link v-if="!list.sublists" :to="list.link" class="flex items-center block p-2 rounded-sm hover:text-white hover:bg-blue-400" :class="{'bg-blue-600 text-white': currentRoute === list.link,}">
+      <router-link v-if="!list.sublists" :to="list.link" class="flex items-center block p-2 rounded-sm hover:text-primary-content hover:bg-primary-focus" :class="{'bg-primary text-primary-content': currentRoute === list.link,}">
         <component :is="icons[list.icon]" class="w-6 h-6 mr-2"></component>
         <span>{{ list.name }}</span>
       </router-link>
-        <div v-else class="flex items-center justify-between p-2 cursor-pointer rounded-sm hover:bg-blue-400 hover:text-white" @click="toggle(list.name)">
+        <div v-else class="flex items-center justify-between p-2 cursor-pointer rounded-sm hover:bg-primary-focus hover:text-primary-content" @click="toggle(list.name)">
             <div class="flex items-center">
                 <component v-bind:is="icons[list.icon]" class="w-6 h-6 mr-2">
                 </component>
@@ -106,7 +106,7 @@ const currentRoute = computed(() => {
         <transition @enter="enter" @leave="leave">
             <ul class="mt-1 overflow-hidden" v-show="list.show">
                 <li class="mb-1" v-for="list in list.sublists" :key="list.name">
-                  <router-link v-if="!list.sublists" :to="list.link" class="flex items-center block p-2 rounded-sm hover:text-white hover:bg-blue-400" :class="{'bg-blue-600 text-white': currentRoute === list.link,}">
+                  <router-link v-if="!list.sublists" :to="list.link" class="flex items-center block p-2 rounded-sm hover:text-primary-content hover:bg-primary-focus" :class="{'bg-primary text-primary-content': currentRoute === list.link,}">
                     <component :is="icons[list.icon]" class="w-6 h-6 mr-2"></component>
                     <span class="pl-8">{{ list.name }}</span>
                   </router-link>
