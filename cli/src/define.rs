@@ -6,5 +6,5 @@ pub const NODEMAP_TCP_PORT: &str = include_str!("../data/nodemap-tcp-port.json")
 pub const NODEMAP_DEFAULT_PORTS: &str = include_str!("../data/nodemap-default-ports.txt");
 pub const NODEMAP_HTTP: &str = include_str!("../data/nodemap-http.txt");
 pub const NODEMAP_HTTPS: &str = include_str!("../data/nodemap-https.txt");
-pub const NODEMAP_OSDB: &str = include_str!("../data/nodemap-osdb.json");
+pub const NODEMAP_OSDB: &str = include_str!("../data/nodemap-osdb-min.json");
 pub const NODEMAP_OS_TTL: &str = include_str!("../data/nodemap-os-ttl.json");
