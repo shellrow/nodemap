@@ -18,8 +18,8 @@ cargo install nodemap
 ```
 
 #### Pre-built binaries
-[Release](https://github.com/shellrow/nodemap/releases)
-available for Linux, macOS and Windows.
+[Download from Releases](https://github.com/shellrow/nodemap/releases)  
+Available for Linux, macOS and Windows.
 
 ## GUI
 Under development.
