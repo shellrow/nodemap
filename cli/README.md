@@ -56,10 +56,10 @@ OPTIONS:
     -s, --source <ip_addr>       Specify the source IP address
     -P, --protocol <protocol>    Specify the protocol
     -m, --maxhop <maxhop>        Set max hop(TTL) for ping or traceroute
-    -T, --scantype <scantype>    Specify the scantype
+    -T, --scantype <scantype>    Specify the scan-type
     -t, --timeout <duration>     Set timeout in ms - Ex: -t 10000
-    -w, --waittime <duration>    Set waittime in ms (default:100ms) - Ex: -w 200
-    -r, --rate <duration>        Set sendrate in ms - Ex: -r 1
+    -w, --waittime <duration>    Set wait-time in ms (default:100ms) - Ex: -w 200
+    -r, --rate <duration>        Set send-rate in ms - Ex: -r 1
     -c, --count <count>          Set number of requests or pings to be sent
     -S, --service                Enable service detection
     -O, --os                     Enable OS detection
