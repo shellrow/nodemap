@@ -471,19 +471,19 @@ pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Domain
             Err(_) => {},
         }
     }
-    let domain_scna_result: domainscan::result::DomainScanResult = handle.join().unwrap();
+    let domain_scan_result: domainscan::result::DomainScanResult = handle.join().unwrap();
     match msg_tx.send(String::from(define::MESSAGE_END_DOMAINSCAN)) {
         Ok(_) => {},
         Err(_) => {},
     }
     let mut domains: Vec<Domain> = vec![];
-    for domain in domain_scna_result.domains {
+    for domain in domain_scan_result.domains {
         domains.push(Domain { domain_name: domain.domain_name, ips: domain.ips });
     }
     let result: DomainScanResult = DomainScanResult { 
         domains: domains, 
-        scan_time: domain_scna_result.scan_time, 
-        scan_status: match domain_scna_result.scan_status {
+        scan_time: domain_scan_result.scan_time, 
+        scan_status: match domain_scan_result.scan_status {
             domainscan::result::ScanStatus::Done => ProbeStatus::Done,
             domainscan::result::ScanStatus::Timeout => ProbeStatus::Timeout,
             domainscan::result::ScanStatus::Error => ProbeStatus::Error,
