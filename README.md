@@ -17,6 +17,10 @@ Cross-platform network mapper
 cargo install nodemap
 ```
 
+#### Pre-built binaries
+[Release](https://github.com/shellrow/nodemap/releases)
+available for Linux, macOS and Windows.
+
 ## GUI
 Under development.
 
