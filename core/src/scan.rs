@@ -227,7 +227,9 @@ pub async fn run_service_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) ->
     // return crate::result::PortScanResult
     if ps_result.result_map.keys().len() > 0 {
         let ip = ps_result.result_map.keys().last().unwrap().clone();
-        let ports = ps_result.result_map.values().last().unwrap().clone();
+        let mut ports = ps_result.result_map.values().last().unwrap().clone();
+        // Sort by port number
+        ports.sort_by(|a, b| a.port.cmp(&b.port));
         let tcp_map = opt.tcp_map;
         let t_map: HashMap<u16, String> = HashMap::new();
         let service_map = sd_result.get(&ip).unwrap_or(&t_map);
@@ -314,6 +316,8 @@ pub async fn run_node_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> Ho
         Ok(_) => {},
         Err(_) => {},
     }
+    // Sort by IP Address
+    result.hosts.sort_by(|a, b| a.ip_addr.cmp(&b.ip_addr));
     let lookup_time:Duration = Instant::now().duration_since(start_time);
     result.host_scan_time = hs_result.scan_time;
     result.lookup_time = lookup_time;
