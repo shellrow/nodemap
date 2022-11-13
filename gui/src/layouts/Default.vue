@@ -91,7 +91,7 @@ onUnmounted(() => {
   <DropdownMenu />
 </div>
 </div>
-    <div class="text-base-content">
+    <div class="text-base-content m-2 p-2">
         <slot />
     </div>
     </div>

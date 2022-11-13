@@ -4,11 +4,13 @@ use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::fs::read_to_string;
 use ipnet::Ipv4Net;
 use std::str::FromStr;
+use serde::{Serialize, Deserialize};
 use crate::model::TCPFingerprint;
 
 use super::network;
+use super::process;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum CommandType {
     PortScan,
     HostScan,
@@ -44,7 +46,7 @@ impl CommandType {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Protocol {
     TCP,
     UDP,
@@ -64,7 +66,7 @@ impl Protocol {
 }
 
 /// Scan Type 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ScanType {
     /// Default fast port scan type.
     /// 
@@ -106,7 +108,7 @@ impl ScanType {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TargetInfo {
     pub ip_addr: IpAddr,
     pub host_name: String,
@@ -195,7 +197,7 @@ impl TargetInfo {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ScanOption {
     pub command_type: CommandType,
     pub interface_index: u32,
@@ -273,6 +275,31 @@ impl ScanOption {
             oui_map: HashMap::new(),
             ttl_map: HashMap::new(),
         }
+    }
+    pub fn default() -> ScanOption {
+        let mut opt = ScanOption::new();
+        opt.src_port = 53443;
+        match default_net::get_default_interface() {
+            Ok(interface) => {
+                opt.interface_index = interface.index;
+                opt.interface_name = interface.name;
+                if interface.ipv4.len() > 0 {
+                    opt.src_ip = IpAddr::V4(interface.ipv4[0].addr);
+                }else{
+                    if interface.ipv6.len() > 0 {
+                        opt.src_ip = IpAddr::V6(interface.ipv6[0].addr);
+                    }
+                }
+            },
+            Err(_) => {},
+        }
+        if process::privileged() {
+            opt.port_scan_type = ScanType::TcpSynScan;
+        }else{
+            opt.port_scan_type = ScanType::TcpConnectScan;
+            opt.async_scan = true;
+        }
+        opt
     }
     pub fn set_dst_hosts_from_na(&mut self, v: String, prefix_len: u8, port: Option<u16>) {
         match v.parse::<IpAddr>(){

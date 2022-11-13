@@ -2,7 +2,6 @@
 import { reactive, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import {
-  TemplateIcon,
   ChevronDownIcon,
   ServerIcon,
   EyeIcon,
@@ -12,7 +11,7 @@ import {
 const lists = reactive([
   {
     name: 'Map',
-    icon: 'TemplateIcon',
+    icon: 'ServerIcon',
     link: '/',
   },
   {
@@ -47,7 +46,7 @@ const lists = reactive([
 ]);
 
 const icons = {
-  TemplateIcon: TemplateIcon,
+  ServerIcon: ServerIcon,
   EyeIcon: EyeIcon,
   DocumentTextIcon: DocumentTextIcon,
 };

@@ -79,7 +79,7 @@ onMounted(() => {
   >
   </v-network-graph>
 
-  <div class="overflow-x-auto">
+  <div class="overflow-auto">
   <div tabindex="0" class="collapse collapse-open"> 
   <div class="collapse-title text-xl font-medium">
     Latest scan report for 45.33.32.156
