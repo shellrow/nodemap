@@ -75,7 +75,7 @@ onMounted(() => {
     :edges="edges"
     :layouts="layouts"
     :configs="configs"
-    style="height: 500px;"
+    style="height: 400px;"
   >
   </v-network-graph>
 
