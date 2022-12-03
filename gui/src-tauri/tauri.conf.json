@@ -28,7 +28,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.audenth.nodemap-desktop",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -55,10 +55,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 800,
         "resizable": true,
         "title": "NodeMap Desktop",
-        "width": 800
+        "width": 1280
       }
     ]
   }
