@@ -132,7 +132,7 @@ pub fn run_service_detection(targets: Vec<TargetInfo>, msg_tx: &mpsc::Sender<Str
     for target in targets {
         let mut service_detector = ServiceDetector::new();
         service_detector.set_dst_ip(target.ip_addr);
-        service_detector.set_open_ports(target.ports);
+        service_detector.set_ports(target.ports);
         let service_map: HashMap<u16, String> = service_detector.detect(port_db.clone());
         map.insert(target.ip_addr, service_map);
         match msg_tx.send(target.ip_addr.to_string()) {
