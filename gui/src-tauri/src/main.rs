@@ -6,11 +6,19 @@
 mod define;
 mod db;
 mod commands;
-use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan};
+use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan, exec_hostscan};
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan])
+    .invoke_handler(tauri::generate_handler![
+      test_command, 
+      test_command_arg, 
+      test_command_return, 
+      test_command_result, 
+      test_command_async, 
+      exec_portscan, 
+      exec_hostscan
+      ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
