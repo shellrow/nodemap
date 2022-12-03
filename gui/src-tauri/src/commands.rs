@@ -3,7 +3,7 @@ use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use serde::{Serialize, Deserialize};
 use nodemap_core::option::{TargetInfo, ScanOption, CommandType, ScanType};
-use nodemap_core::result::{PortScanResult};
+use nodemap_core::result::{PortScanResult, HostScanResult};
 use nodemap_core::process;
 use nodemap_core::scan;
 use nodemap_core::validator;
@@ -80,6 +80,18 @@ impl PortArg {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct HostArg {
+    network_address: String,
+    prefix_len: u8,
+    target_hosts: Vec<String>,
+    scan_type: String,
+    async_flag: bool,
+    dsn_lookup_flag: bool,
+    os_detection_flag: bool,
+    save_flag: bool,
+}
+
 // Test commands
 #[tauri::command]
 pub fn test_command() {
@@ -126,5 +138,11 @@ pub async fn exec_portscan(opt: PortArg) -> PortScanResult {
         })
     });
     let result: PortScanResult = handle.join().unwrap();
+    result
+}
+
+#[tauri::command]
+pub async fn exec_hostscan(opt: HostArg) -> HostScanResult {
+    let result = HostScanResult::new();
     result
 }
