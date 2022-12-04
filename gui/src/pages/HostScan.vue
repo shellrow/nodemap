@@ -9,6 +9,8 @@ const iHost = ref("");
 const option = reactive({
   network_address: "",
   prefix_len: 24,
+  protocol: "ICMPv4",
+  port: 0,
   target_hosts:[],
   scan_type: "network",
   async_flag: true,
@@ -42,6 +44,8 @@ const runHostScan = async() => {
   const opt = {
     network_address: option.network_address,
     prefix_len: option.prefix_len,
+    protocol: option.protocol,
+    port: option.port,
     target_hosts: option.target_hosts,
     scan_type: option.scan_type,
     async_flag: option.async_flag,
@@ -86,18 +90,34 @@ onMounted(() => {
   <div class="card-body">
     <h2 class="card-title">Host Scan</h2>
     <!--Option Body-->
-    <div class="grid grid-cols-4 gap-4">
+    <div class="grid grid-cols-6 gap-4">
     <div>
       <label class="label">
         <span class="label-text">Network Address</span>
       </label>
-      <input type="text" v-model="option.network_address" placeholder="xxx.xxx.xxx.0" class="input input-bordered w-full max-w-md" />
+      <input type="text" v-model="option.network_address" placeholder="xxx.xxx.xxx.0" class="input input-bordered w-40 max-w-md" />
     </div>
-    <div>
+    <div class="pl-4">
       <label class="label">
         <span class="label-text">Prefix</span>
       </label>
-      <input type="number" v-model="option.prefix_len" min="8" max="30" placeholder="24" class="input input-bordered w-full max-w-md" />
+      <input type="number" v-model="option.prefix_len" min="8" max="30" placeholder="24" class="input input-bordered w-24 max-w-md" />
+    </div>
+    <div>
+      <label class="label">
+        <span class="label-text">Protocol</span>
+      </label>
+      <select v-model="option.protocol" class="select select-bordered w-full max-w-md">
+        <option disabled selected value="">Select</option>
+        <option value="ICMPv4">ICMP</option>
+        <option value="TCP">TCP</option>
+      </select>
+    </div>
+    <div>
+      <label class="label">
+        <span class="label-text">Port</span>
+      </label>
+      <input type="number" v-model="option.port" min="0" max="65535" placeholder="80" class="input input-bordered w-32 max-w-md" />
     </div>
     <div>
       <label class="label">
