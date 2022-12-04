@@ -2,7 +2,7 @@ use std::net::IpAddr;
 use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use serde::{Serialize, Deserialize};
-use nodemap_core::option::{TargetInfo, ScanOption, CommandType, ScanType};
+use nodemap_core::option::{TargetInfo, ScanOption, CommandType, ScanType, Protocol};
 use nodemap_core::result::{PortScanResult, HostScanResult};
 use nodemap_core::process;
 use nodemap_core::scan;
@@ -84,12 +84,64 @@ impl PortArg {
 pub struct HostArg {
     network_address: String,
     prefix_len: u8,
+    protocol: String,
+    port: u16,
     target_hosts: Vec<String>,
     scan_type: String,
     async_flag: bool,
     dsn_lookup_flag: bool,
     os_detection_flag: bool,
     save_flag: bool,
+}
+
+impl HostArg {
+    pub fn new() -> HostArg {
+        HostArg {
+            network_address: String::new(),
+            prefix_len: 24,
+            protocol: Protocol::ICMPv4.name(),
+            port: 0,
+            target_hosts: vec![],
+            scan_type: String::new(),
+            async_flag: false,
+            dsn_lookup_flag: false,
+            os_detection_flag: false,
+            save_flag: false,
+        }
+    }
+    pub fn to_scan_option(&self) -> nodemap_core::option::ScanOption {
+        let mut opt: ScanOption = ScanOption::default();
+        opt.command_type = CommandType::HostScan;
+        if self.protocol == Protocol::TCP.name() {
+            opt.protocol = Protocol::TCP;
+            opt.host_scan_type = ScanType::TcpPingScan;
+        }else{
+            opt.protocol = Protocol::ICMPv4;
+            opt.host_scan_type = ScanType::IcmpPingScan;
+        }
+        opt.async_scan = self.async_flag;
+        if self.scan_type == String::from("custom_list") {
+            for host in &self.target_hosts {
+                match host.parse::<IpAddr>(){
+                    Ok(ip_addr) => {
+                        if self.port == 0 {
+                            opt.targets.push(TargetInfo::new_with_socket(ip_addr, 80));
+                        }else{
+                            opt.targets.push(TargetInfo::new_with_socket(ip_addr, self.port));
+                        }
+                    },
+                    Err(_) => {},
+                }
+            }
+        } else {
+            if self.port == 0 {
+                opt.set_dst_hosts_from_na(self.network_address.clone(), self.prefix_len, Some(80));
+            }else{
+                opt.set_dst_hosts_from_na(self.network_address.clone(), self.prefix_len, Some(self.port));
+            }
+        }
+        opt
+    }
 }
 
 // Test commands
@@ -143,6 +195,14 @@ pub async fn exec_portscan(opt: PortArg) -> PortScanResult {
 
 #[tauri::command]
 pub async fn exec_hostscan(opt: HostArg) -> HostScanResult {
-    let result = HostScanResult::new();
+    let probe_opt: ScanOption = opt.to_scan_option();
+    let m_probe_opt: ScanOption = probe_opt.clone();
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let handle = thread::spawn(move|| {
+        async_io::block_on(async {
+            scan::run_node_scan(m_probe_opt, &msg_tx).await
+        })
+    });
+    let result: HostScanResult = handle.join().unwrap();
     result
 }
