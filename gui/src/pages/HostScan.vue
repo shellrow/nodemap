@@ -58,9 +58,11 @@ const runHostScan = async() => {
     scanStatus.value = "END";
     console.log(scan_result);
     result.hosts = scan_result.hosts;
-    result.host_scan_time = scan_result.host_scan_time;
-    result.lookup_time = scan_result.lookup_time;
-    result.total_scan_time = scan_result.total_scan_time;
+    const host_scan_time = parseFloat(`${scan_result.host_scan_time.secs}.${scan_result.host_scan_time.nanos}`);
+    const lookup_time = parseFloat(`${scan_result.lookup_time.secs}.${scan_result.lookup_time.nanos}`);
+    result.host_scan_time = host_scan_time.toFixed(4);
+    result.lookup_time = lookup_time.toFixed(4);
+    result.total_scan_time = (host_scan_time + lookup_time).toFixed(4);
     console.log(result);
   });
 };
@@ -244,30 +246,30 @@ onMounted(() => {
           <div class="stats shadow">
           <div class="stat">
             <div class="stat-title">Target</div>
-            <div class="stat-value">Test</div>
-            <div class="stat-desc">Test</div>
+            <div class="stat-value">{{option.network_address}}</div>
+            <div class="stat-desc">/{{option.prefix_len}}</div>
           </div>
         </div>
         <div class="stats shadow">
           <div class="stat">
             <div class="stat-title">Host Scan Time</div>
-            <div class="stat-value">Test</div>
-            <div class="stat-desc">Test</div>
+            <div class="stat-value">{{ result.host_scan_time }}</div>
+            <div class="stat-desc">sec</div>
           </div>
         </div>
 
         <div class="stats shadow">
           <div class="stat">
             <div class="stat-title">Lookup Time</div>
-            <div class="stat-value">Test</div>
-            <div class="stat-desc">Test</div>
+            <div class="stat-value">{{ result.lookup_time }}</div>
+            <div class="stat-desc">sec</div>
           </div>
         </div>
         <div class="stats shadow">
           <div class="stat">
             <div class="stat-title">Total Scan Time</div>
-            <div class="stat-value">Test</div>
-            <div class="stat-desc">Test</div>
+            <div class="stat-value">{{ result.total_scan_time }}</div>
+            <div class="stat-desc">sec</div>
           </div>
         </div>
         </div>
