@@ -120,6 +120,8 @@ impl HostArg {
             opt.host_scan_type = ScanType::IcmpPingScan;
         }
         opt.async_scan = self.async_flag;
+        opt.oui_map = db::get_oui_map();
+        opt.ttl_map = db::get_os_ttl();
         if self.scan_type == String::from("custom_list") {
             for host in &self.target_hosts {
                 match host.parse::<IpAddr>(){
