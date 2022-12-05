@@ -57,7 +57,6 @@ const clickRemovePort = (portNo) => {
 
 const runPortScan = async() => {
   isScanning.value = true;
-  //await sleep(2000);
   const opt = {
     target_host: option.target_host,
     port_option: option.port_option,
