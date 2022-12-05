@@ -1,12 +1,16 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
+import { debounce } from 'lodash';
 
 const isScanning = ref(false);
 const scanStatus = ref("READY");
 const iPort = ref(1);
 const iMinPort = ref(1);
 const iMaxPort = ref(1000);
+const innerHeight = ref(window.innerHeight);
+const headerHeight = 500;
+const contentHeight = ref(300);
 
 const option = reactive({
   target_host: "",
@@ -84,6 +88,15 @@ const clickScan = (event) => {
   runPortScan();
 };
 
+const checkWindowSize = () => {
+  innerHeight.value = window.innerHeight;
+  if (innerHeight.value - headerHeight < 0) {
+    contentHeight.value = 0;
+  }else{
+    contentHeight.value = innerHeight.value - headerHeight;
+  }
+};
+
 onMounted(() => {
   invoke('test_command');
 
@@ -97,7 +110,14 @@ onMounted(() => {
 
   invoke('test_command_async').then(() => console.log('Completed!'));
 
+  window.addEventListener('resize', debounce(checkWindowSize, 100));
+
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkWindowSize);
+});
+
 </script>
 
 <template>
@@ -251,7 +271,8 @@ onMounted(() => {
         Scan report for {{ result.ip_addr }}
       </div>
       <div class="collapse-content"> 
-        <div>
+        <el-scrollbar :max-height="contentHeight + 'px'">
+          <div>
           <div class="stats shadow">
           <div class="stat">
             <div class="stat-title">Host</div>
@@ -303,6 +324,7 @@ onMounted(() => {
         </tbody>
         </table>
         </div>
+        </el-scrollbar>
       </div>
     </div>
   </div>
