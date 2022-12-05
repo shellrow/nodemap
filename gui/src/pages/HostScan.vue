@@ -44,7 +44,6 @@ const clickRemoveHost = (portNo) => {
 
 const runHostScan = async() => {
   isScanning.value = true;
-  await sleep(2000);
   const opt = {
     network_address: option.network_address,
     prefix_len: option.prefix_len,
