@@ -3,7 +3,7 @@ use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use serde::{Serialize, Deserialize};
 use nodemap_core::option::{TargetInfo, ScanOption, CommandType, ScanType, Protocol};
-use nodemap_core::result::{PortScanResult, HostScanResult};
+use nodemap_core::result::{PortScanResult, HostScanResult, PingStat};
 use nodemap_core::process;
 use nodemap_core::scan;
 use nodemap_core::validator;
@@ -146,6 +146,51 @@ impl HostArg {
     }
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct PingArg {
+    target_host: String,
+    protocol: String,
+    port: u16,
+    count: u32,
+    os_detection_flag: bool,
+    save_flag: bool,
+}
+
+impl PingArg {
+    pub fn to_scan_option(&self) -> nodemap_core::option::ScanOption {
+        let mut opt: ScanOption = ScanOption::default();
+        opt.command_type = CommandType::Ping;
+        // TODO: IPv6 support
+        let target_ip: IpAddr = match self.target_host.parse::<IpAddr>(){
+                                    Ok(ip) => {
+                                        ip
+                                    },
+                                    Err(_) => {
+                                        match network::lookup_host_name(self.target_host.clone()) {
+                                            Some(ip) => {
+                                                ip
+                                            },
+                                            None => {
+                                                return opt;
+                                            }
+                                        }
+                                    },
+                                };
+        if self.protocol == Protocol::TCP.name() {
+            opt.protocol = Protocol::TCP;
+            opt.targets.push(TargetInfo::new_with_socket(target_ip, self.port));
+        } else if self.protocol == Protocol::UDP.name() {
+            opt.protocol = Protocol::UDP;
+            opt.targets.push(TargetInfo::new_with_socket(target_ip, 33435));
+        } else {
+            opt.protocol = Protocol::ICMPv4;
+            opt.targets.push(TargetInfo::new_with_ip_addr(target_ip));
+        }
+        opt.count = self.count;
+        opt
+    }
+}
+
 // Test commands
 #[tauri::command]
 pub fn test_command() {
@@ -206,5 +251,23 @@ pub async fn exec_hostscan(opt: HostArg) -> HostScanResult {
         })
     });
     let result: HostScanResult = handle.join().unwrap();
+    result
+}
+
+#[tauri::command]
+pub async fn exec_ping(opt: PingArg) -> PingStat {
+    let probe_opt: ScanOption = opt.to_scan_option();
+    let m_probe_opt: ScanOption = probe_opt.clone();
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let handle = thread::spawn(move|| {
+        async_io::block_on(async {
+            scan::run_ping(m_probe_opt, &msg_tx)
+        })
+    });
+    //Progress
+    while let Ok(msg) = msg_rx.recv() {
+        println!("{:?}", msg);
+    } 
+    let result: PingStat = handle.join().unwrap();
     result
 }

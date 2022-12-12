@@ -6,7 +6,7 @@
 mod define;
 mod db;
 mod commands;
-use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan, exec_hostscan};
+use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan, exec_hostscan, exec_ping};
 
 fn main() {
   tauri::Builder::default()
@@ -17,7 +17,8 @@ fn main() {
       test_command_result, 
       test_command_async, 
       exec_portscan, 
-      exec_hostscan
+      exec_hostscan,
+      exec_ping
       ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
