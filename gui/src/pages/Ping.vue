@@ -18,11 +18,8 @@ const option = reactive({
   save_flag: false,
 });
 
-const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
-
 const runPing = async() => {
   isPinging.value = true;
-  //await sleep(2000);
   const opt = {
     target_host: option.target_host,
     protocol: option.protocol,
@@ -125,7 +122,7 @@ onUnmounted(() => {
         </div>
         Ping
       </button>
-      
+
     </div>
   </div>
 </div>

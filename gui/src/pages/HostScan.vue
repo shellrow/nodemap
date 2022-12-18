@@ -30,8 +30,6 @@ const result = reactive({
   total_scan_time: "",
 });
 
-const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
-
 const clickAddHost = (event) => {
   option.target_hosts.push(iHost.value);
 };

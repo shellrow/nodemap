@@ -35,8 +35,6 @@ const result = reactive({
   cpe_detail: "",
 });
 
-const sleep = msec => new Promise(resolve => setTimeout(resolve, msec));
-
 const clickAddPort = (event) => {
   option.ports.push(iPort.value);
 };
