@@ -2,6 +2,8 @@ use std::net::IpAddr;
 use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use serde::{Serialize, Deserialize};
+use tauri::Manager;
+
 use nodemap_core::option::{TargetInfo, ScanOption, CommandType, ScanType, Protocol};
 use nodemap_core::result::{PortScanResult, HostScanResult, PingStat};
 use nodemap_core::process;
@@ -255,7 +257,7 @@ pub async fn exec_hostscan(opt: HostArg) -> HostScanResult {
 }
 
 #[tauri::command]
-pub async fn exec_ping(opt: PingArg) -> PingStat {
+pub async fn exec_ping(opt: PingArg, app_handle: tauri::AppHandle) -> PingStat {
     let probe_opt: ScanOption = opt.to_scan_option();
     let m_probe_opt: ScanOption = probe_opt.clone();
     let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
@@ -266,7 +268,8 @@ pub async fn exec_ping(opt: PingArg) -> PingStat {
     });
     //Progress
     while let Ok(msg) = msg_rx.recv() {
-        println!("{:?}", msg);
+        println!("[exec_ping] {:?}", msg);
+        app_handle.emit_all("ping_progress", format!("rs: {}", msg)).unwrap();
     } 
     let result: PingStat = handle.join().unwrap();
     result
