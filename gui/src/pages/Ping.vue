@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
+import { listen } from '@tauri-apps/api/event';
 import { debounce } from 'lodash';
 
 const isPinging = ref(false);
@@ -18,7 +19,20 @@ const option = reactive({
   save_flag: false,
 });
 
+const result = reactive({
+  ping_results: [],
+  probe_time: "",
+  transmitted_count: 0,
+  received_count: 0,
+  min: "",
+  avg: "", 
+  max: "",
+});
+
 const runPing = async() => {
+  const unlisten = await listen('ping_progress', (event) => {
+    console.log(event);
+  });
   isPinging.value = true;
   const opt = {
     target_host: option.target_host,
@@ -32,6 +46,18 @@ const runPing = async() => {
     isPinging.value = false;
     pingStatus.value = "END";
     console.log(ping_stat);
+    result.ping_results = ping_stat.ping_results;
+    result.transmitted_count = ping_stat.transmitted_count;
+    result.received_count = ping_stat.received_count;
+    const probe_time = parseFloat(`${ping_stat.probe_time.secs}.${ping_stat.probe_time.nanos}`);
+    const min = parseFloat(`${ping_stat.min.secs}.${ping_stat.min.nanos}`);
+    const avg = parseFloat(`${ping_stat.avg.secs}.${ping_stat.avg.nanos}`);
+    const max = parseFloat(`${ping_stat.max.secs}.${ping_stat.max.nanos}`);
+    result.probe_time = probe_time.toFixed(4);
+    result.min = min.toFixed(4);
+    result.avg = avg.toFixed(4);
+    result.max = max.toFixed(4);
+    console.log(result);
   });
 };
 
@@ -56,6 +82,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('resize', checkWindowSize);
 });
+
 </script>
 
 <template>
