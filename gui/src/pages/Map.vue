@@ -2,5 +2,5 @@
 </script>
 
 <template>
-    Profile
+    Map
 </template>

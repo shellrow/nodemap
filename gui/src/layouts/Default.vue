@@ -1,99 +1,137 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { MenuIcon, MoonIcon, SunIcon } from '@heroicons/vue/outline';
-import { debounce } from 'lodash';
-import DropdownMenu from '../components/DropdownMenu.vue';
-import Sidebar from '../components/Sidebar.vue';
-import { themeChange } from 'theme-change';
-import { useRouter } from 'vue-router';
+import {ref ,onMounted, onUnmounted} from 'vue';
+import {debounce} from 'lodash';
+import {Document, Menu as IconMenu, Setting, Sunny, Moon, Expand, Fold, View} from '@element-plus/icons-vue';
+
+import NodeMapLogo from "../assets/nodemap_logo.png";
 
 const innerWidth = ref(window.innerWidth);
-const show = ref(innerWidth.value >= 1280 ? true : false);
-//const theme = ref('light');
-const router = useRouter();
+const innerHeight = ref(window.innerHeight);
+const theme = ref('light');
+const activeIndex = ref('0');
+const mode = ref(true);
+const isCollapse = ref(innerWidth.value < 1200 ? true : false);
 
-const checkWindowSize = () => {
-  if (window.innerWidth >= 1280) {
-    if (show.value === false && innerWidth.value < 1280) show.value = true;
-  } else {
-    if (show.value === true) show.value = false;
-  }
-  innerWidth.value = window.innerWidth;
-};
+if (localStorage.theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    theme.value = 'dark';
+    mode.value = false;
+} else {
+    document.documentElement.classList.remove('dark');
+    theme.value = 'light';
+    mode.value = true;
+}
 
 const changeMode = (event) => {
-  router.go(router.currentRoute);
+    if (mode.value) {
+        theme.value = 'light';
+    }else{
+        theme.value = 'dark'; 
+    }
+    theme.value === 'light' 
+        ? document.documentElement.classList.remove('dark')
+        : document.documentElement.classList.add('dark');
+    localStorage.theme = theme.value;
+};
+
+const handleSelect = (key, keyPath) => {
+    // Omit!
+    console.log(key, keyPath);
+};
+const handleOpen = (key, keyPath) => {
+    // Omit!
+    console.log(key, keyPath);
+};
+const handleClose = (key, keyPath) => {
+    // Omit!
+    console.log(key, keyPath);
+};
+const handleCollapse = (event) => {
+    isCollapse.value = !isCollapse.value;
+};
+
+const checkWindowSize = () => {
+    if (window.innerWidth < 1280) {
+        if (isCollapse.value === false && innerWidth.value >= 1280) isCollapse.value = true;
+    }else{
+        if (isCollapse.value === true) isCollapse.value = false;
+    }
+    innerWidth.value = window.innerWidth;
+    innerHeight.value = window.innerHeight;
 };
 
 onMounted(() => {
-  window.addEventListener('resize', debounce(checkWindowSize, 100));
-  themeChange(false);
+    window.addEventListener('resize', debounce(checkWindowSize, 100));
 });
+
 onUnmounted(() => {
-  window.removeEventListener('resize', checkWindowSize);
+    window.removeEventListener('resize', checkWindowSize);
 });
 </script>
 
+<style>
+.flex-grow {
+    flex-grow: 1;
+}
+</style>
+
 <template>
-<div class="relative">
-    <div
-      class="
-        fixed
-        top-0
-        w-64
-        h-screen
-        bg-base-200 
-        z-20
-        transform
-        duration-300
-        text-base-content
-      "
-      :class="{ '-translate-x-full': !show }"
-    >
-      <Sidebar />
+    <div class="common-layout">
+        <el-container>
+            <el-aside id="side-menu" :width="isCollapse ? '80px' : '200px'" class="duration-300" >
+                <el-menu default-active="1" :collapse="isCollapse" :style="'min-height:'+ innerHeight + 'px'" @open="handleOpen" @close="handleClose">
+                    <el-menu-item index="0">
+                        <router-link to="/">
+                            <img class="img" :src="NodeMapLogo" width="70" />
+                        </router-link>
+                    </el-menu-item>
+                    <el-menu-item index="1">
+                        <el-icon><IconMenu /></el-icon>
+                        <template #title><router-link to="/">Map</router-link></template>
+                    </el-menu-item>
+                    <el-sub-menu index="2">
+                        <template #title>
+                            <el-icon><View /></el-icon>
+                            <span>Probe</span>
+                        </template>
+                        <el-menu-item index="2-1"><router-link to="/port">PortScan</router-link></el-menu-item>
+                        <el-menu-item index="2-2"><router-link to="/host">HostScan</router-link></el-menu-item>
+                        <el-menu-item index="2-3"><router-link to="/ping">Ping</router-link></el-menu-item>
+                        <el-menu-item index="2-4"><router-link to="/trace">Traceroute</router-link></el-menu-item>
+                    </el-sub-menu>
+                    <el-menu-item index="3">
+                        <el-icon><Document /></el-icon>
+                        <template #title><router-link to="/log">Log</router-link></template>
+                    </el-menu-item>
+                    <el-menu-item index="4">
+                        <el-icon><Setting /></el-icon>
+                        <template #title><router-link to="/setting">Setting</router-link></template>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
+            <el-container>
+                <el-header>
+                    <el-menu :default-active="activeIndex" mode="horizontal" :ellipsis="false" @select="handleSelect">
+                        <el-button type="primary" plain size="large" style="margin-left: 4px; margin-top: 10px" @click="handleCollapse">
+                            <el-icon v-if="isCollapse"><Expand /></el-icon>
+                            <el-icon v-else><Fold /></el-icon>
+                        </el-button>
+                        <div class="flex-grow" />
+                        <el-menu-item index="0"><router-link to="/system">System</router-link></el-menu-item>
+                        <el-sub-menu index="1">
+                            <template #title>Account</template>
+                            <el-menu-item index="1-1"><router-link to="/profile">Profile</router-link></el-menu-item>
+                            <el-menu-item index="1-2"><router-link to="/login">Login</router-link></el-menu-item>
+                        </el-sub-menu>
+                        <el-switch v-model="mode" @click="changeMode" style="margin-left: 24px; margin-top: 12px;" inline-prompt :active-icon="Sunny" :inactive-icon="Moon" />
+                    </el-menu>
+                </el-header>
+                <el-main>
+                    <div>
+                        <slot />
+                    </div>
+                </el-main>
+            </el-container>
+        </el-container>
     </div>
-    <div
-    class="fixed xl:hidden inset-0 bg-gray-900 z-10 opacity-50"
-    @click="show = !show"
-    v-show="show"
-    ></div>
-    <div
-    class="bg-base-100 h-screen overflow-hidden duration-300"
-    :class="{ 'xl:pl-64': show }"
-    >
-    <div
-  class="flex items-center justify-between bg-base-200 rounded shadow m-4 p-4"
->
-  <MenuIcon
-    class="h-6 w-6 text-base-content cursor-pointer"
-    @click="show = !show"
-  />
-<div class="flex items-center space-x-4">
-  <select class="select select-primary" data-choose-theme @change="changeMode">
-    <option disabled selected>Select Theme</option>
-    <option value="">Default</option>
-    <option value="dark">Dark</option>
-    <option value="light">Light</option>
-    <option value="night">Night</option>
-    <option value="dracula">Dracula</option>
-    <option value="halloween">Halloween</option>
-  </select>
-<!--   <MoonIcon
-    class="w-7 h-7 text-base-content cursor-pointer"
-    @click="changeMode('dark')"
-    v-if="theme === 'light'"
-  />
-  <SunIcon
-    class="w-7 h-7 text-base-content cursor-pointer"
-    @click="changeMode('light')"
-    v-else
-  /> -->
-  <DropdownMenu />
-</div>
-</div>
-    <div class="text-base-content m-2 p-2">
-        <slot />
-    </div>
-    </div>
-</div>
 </template>

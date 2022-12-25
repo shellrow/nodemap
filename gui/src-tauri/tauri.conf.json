@@ -16,7 +16,7 @@
     "bundle": {
       "active": true,
       "category": "DeveloperTool",
-      "copyright": "",
+      "copyright": "Copyright © 2022-2023 shellrow",
       "deb": {
         "depends": []
       },

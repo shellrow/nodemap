@@ -2,5 +2,5 @@
 </script>
 
 <template>
-    Profile
+    Login
 </template>

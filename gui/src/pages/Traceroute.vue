@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+</script>
+
 <template>
-  <div>Traceroute</div>
+    Traceroute
 </template>

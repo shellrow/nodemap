@@ -1,23 +1,21 @@
 import { createRouter, createWebHistory } from 'vue-router';
-//import Dashboard from '../pages/Dashboard.vue';
-import Profile from '../pages/Profile.vue';
+import Map from '../pages/Map.vue';
 import PortScan from '../pages/PortScan.vue';
 import HostScan from '../pages/HostScan.vue';
 import Ping from '../pages/Ping.vue';
 import Traceroute from '../pages/Traceroute.vue';
 import Log from '../pages/Log.vue';
-import Network from '../pages/Network.vue';
+import Setting from '../pages/Setting.vue';
+import System from '../pages/System.vue';
+import Login from '../pages/Login.vue';
+import Profile from '../pages/Profile.vue';
+import About from '../pages/About.vue';
 
 const routes = [
   {
     path: '/',
-    name: 'Dashboard',
-    component: Network,
-  },
-  {
-    path: '/profile',
-    name: 'Profile',
-    component: Profile,
+    name: 'Map',
+    component: Map,
   },
   {
     path: '/port',
@@ -43,6 +41,31 @@ const routes = [
     path: '/log',
     name: 'Log',
     component: Log,
+  },
+  {
+    path: '/setting',
+    name: 'Setting',
+    component: Setting,
+  },
+  {
+    path: '/system',
+    name: 'System',
+    component: System,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: About,
   },
 ];
 
