@@ -19,7 +19,7 @@ pub struct PortArg {
 }
 
 impl PortArg {
-    pub fn new() -> PortArg {
+/*     pub fn new() -> PortArg {
         PortArg {
             target_host: String::new(),
             port_option: String::new(),
@@ -30,7 +30,7 @@ impl PortArg {
             os_detection_flag: false,
             save_flag: false,
         }
-    }
+    } */
     pub fn to_scan_option(&self) -> nodemap_core::option::ScanOption {
         let mut opt: ScanOption = ScanOption::default();
         opt.command_type = CommandType::PortScan;
@@ -89,7 +89,7 @@ pub struct HostArg {
 }
 
 impl HostArg {
-    pub fn new() -> HostArg {
+/*     pub fn new() -> HostArg {
         HostArg {
             network_address: String::new(),
             prefix_len: 24,
@@ -102,7 +102,7 @@ impl HostArg {
             os_detection_flag: false,
             save_flag: false,
         }
-    }
+    } */
     pub fn to_scan_option(&self) -> nodemap_core::option::ScanOption {
         let mut opt: ScanOption = ScanOption::default();
         opt.command_type = CommandType::HostScan;
