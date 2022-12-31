@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { debounce } from 'lodash';
 import {sleep} from '../logic/shared.js';
+import {PORT_OPTION_DEFAULT,PORT_OPTION_WELL_KNOWN,PORT_OPTION_CUSTOM_LIST,PORTSCAN_TYPE_TCP_SYN,PORTSCAN_TYPE_TCP_CONNECT} from '../define.js';
 
 const scanning = ref(false);
 const dialog_list_visible = ref(false);
@@ -34,9 +35,9 @@ const handle_input_confirm = () => {
 
 const option = reactive({
     target_host: "",
-    port_option: "default",
+    port_option: PORT_OPTION_DEFAULT,
     ports:[],
-    scan_type: "tcp_syn_scan",
+    scan_type: PORTSCAN_TYPE_TCP_SYN,
     async_flag: true,
     service_detection_flag: true,
     os_detection_flag: true,
@@ -57,26 +58,26 @@ const result = reactive({
 
 const port_options = [
   {
-    value: 'default',
+    value: PORT_OPTION_DEFAULT,
     label: 'Default(1005 ports)',
   },
   {
-    value: 'well_known',
+    value: PORT_OPTION_WELL_KNOWN,
     label: 'Well Known(Top 1000)',
   },
   {
-    value: 'custom_list',
+    value: PORT_OPTION_CUSTOM_LIST,
     label: 'Custom List',
   },
 ];
 
 const scan_type_options = [
   {
-    value: 'tcp_syn_scan',
+    value: PORTSCAN_TYPE_TCP_SYN,
     label: 'TCP SYN Scan',
   },
   {
-    value: 'tcp_connect_scan',
+    value: PORTSCAN_TYPE_TCP_CONNECT,
     label: 'TCP Connect Scan',
   },
 ];
