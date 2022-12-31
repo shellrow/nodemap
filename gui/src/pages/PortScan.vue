@@ -30,7 +30,7 @@ const handle_input_confirm = () => {
   }
   tag_input_visible.value = false
   tag_input_value.value = ''
-};;
+};
 
 const option = reactive({
     target_host: "",
