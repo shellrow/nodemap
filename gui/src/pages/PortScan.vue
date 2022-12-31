@@ -1,10 +1,36 @@
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { debounce } from 'lodash';
 import {sleep} from '../logic/shared.js';
 
 const scanning = ref(false);
+const dialog_list_visible = ref(false);
+
+//Port Tags
+const tag_input_value = ref('');
+const port_tags = ref([]);
+const tag_input_visible = ref(false);
+const tag_input_ref = ref(null);
+
+const handle_tag_close = (tag) => {
+  port_tags.value.splice(port_tags.value.indexOf(tag), 1)
+};
+
+const show_tag_input = () => {
+  tag_input_visible.value = true
+  nextTick(() => {
+    tag_input_ref.value.input.focus()
+  })
+};
+
+const handle_input_confirm = () => {
+  if (tag_input_value.value) {
+    port_tags.value.push(tag_input_value.value)
+  }
+  tag_input_visible.value = false
+  tag_input_value.value = ''
+};;
 
 const option = reactive({
     target_host: "",
@@ -144,7 +170,7 @@ onUnmounted(() => {
             </el-col>
             <el-col :span="6">
                 <p style="font-size: var(--el-font-size-small)">Port List</p>
-                <el-button type="info" plain>List</el-button>
+                <el-button type="info" plain @click="dialog_list_visible = true">List</el-button>
             </el-col>
             <el-col :span="6">
                 <p style="font-size: var(--el-font-size-small)">Scan Type</p>
@@ -196,4 +222,38 @@ onUnmounted(() => {
       </el-table>
     </div>
     <!-- Results -->
+    <!-- Dialog -->
+    <el-dialog v-model="dialog_list_visible" title="Target Ports">
+      <el-tag
+        v-for="tag in port_tags"
+        :key="tag"
+        class="mx-1"
+        closable
+        :disable-transitions="false"
+        @close="handle_tag_close(tag)"
+      >
+        {{ tag }}
+      </el-tag>
+      <el-input 
+        type="number" 
+        min="1" 
+        max="65535"
+        v-if="tag_input_visible"
+        ref="tag_input_ref"
+        v-model="tag_input_value"
+        class="ml-1 w-20"
+        size="small"
+        @keyup.enter="handle_input_confirm"
+        @blur="handle_input_confirm"
+      />
+      <el-button v-else class="button-new-tag ml-1" size="small" @click="show_tag_input">
+        + New Port
+      </el-button>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialog_list_visible = false">Close</el-button>
+        </span>
+      </template>
+    </el-dialog>
+    <!-- Dialog -->
 </template>
