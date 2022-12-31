@@ -1,6 +1,6 @@
-pub const CRATE_UPDATE_DATE: &str = "2022-11-13";
-pub const CRATE_REPOSITORY: &str = "https://github.com/shellrow/nodemap";
-pub const DEFAULT_SRC_PORT: u16 = 53443;
+//pub const CRATE_UPDATE_DATE: &str = "2022-12-31";
+//pub const CRATE_REPOSITORY: &str = "https://github.com/shellrow/nodemap";
+//pub const DEFAULT_SRC_PORT: u16 = 53443;
 pub const NODEMAP_OUI: &str = include_str!("../../../data/nodemap-oui.json");
 pub const NODEMAP_TCP_PORT: &str = include_str!("../../../data/nodemap-tcp-port.json");
 pub const NODEMAP_DEFAULT_PORTS: &str = include_str!("../../../data/nodemap-default-ports.txt");
