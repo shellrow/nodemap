@@ -46,7 +46,7 @@ pub async fn test_command_async() {
 pub async fn exec_portscan(opt: models::PortArg) -> PortScanResult {
     let probe_opt: ScanOption = opt.to_scan_option();
     let m_probe_opt: ScanOption = probe_opt.clone();
-    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let (msg_tx, _msg_rx): (Sender<String>, Receiver<String>) = channel();
     let handle = thread::spawn(move|| {
         async_io::block_on(async {
             scan::run_service_scan(m_probe_opt, &msg_tx).await
@@ -60,7 +60,7 @@ pub async fn exec_portscan(opt: models::PortArg) -> PortScanResult {
 pub async fn exec_hostscan(opt: models::HostArg) -> HostScanResult {
     let probe_opt: ScanOption = opt.to_scan_option();
     let m_probe_opt: ScanOption = probe_opt.clone();
-    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let (msg_tx, _msg_rx): (Sender<String>, Receiver<String>) = channel();
     let handle = thread::spawn(move|| {
         async_io::block_on(async {
             scan::run_node_scan(m_probe_opt, &msg_tx).await
