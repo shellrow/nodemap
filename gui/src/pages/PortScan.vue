@@ -15,22 +15,24 @@ const tag_input_visible = ref(false);
 const tag_input_ref = ref(null);
 
 const handle_tag_close = (tag) => {
-  port_tags.value.splice(port_tags.value.indexOf(tag), 1)
+  port_tags.value.splice(port_tags.value.indexOf(tag), 1);
 };
 
 const show_tag_input = () => {
-  tag_input_visible.value = true
+  tag_input_visible.value = true;
   nextTick(() => {
-    tag_input_ref.value.input.focus()
-  })
+    tag_input_ref.value.input.focus();
+  });
 };
 
 const handle_input_confirm = () => {
   if (tag_input_value.value) {
-    port_tags.value.push(tag_input_value.value)
+    if (!port_tags.value.includes(tag_input_value.value)){
+      port_tags.value.push(tag_input_value.value);
+    }
   }
-  tag_input_visible.value = false
-  tag_input_value.value = ''
+  tag_input_visible.value = false;
+  tag_input_value.value = '';
 };
 
 const option = reactive({
@@ -84,6 +86,11 @@ const scan_type_options = [
 
 const runPortScan = async() => {
   scanning.value = true;
+  if (option.port_option === PORT_OPTION_CUSTOM_LIST) {
+    port_tags.value.forEach(port => {
+      option.ports.push(parseInt(port));
+    });
+  }
   const opt = {
     target_host: option.target_host,
     port_option: option.port_option,
@@ -200,31 +207,50 @@ onUnmounted(() => {
         </el-row>
         <!-- Options -->
     </el-card>
+
     <!-- Results -->
     <div v-loading="scanning" element-loading-text="Scanning..." class="mt-2">
-      <el-descriptions
-        title="Scan Result"
-        direction="vertical"
-        :column="4"
-        border
-      >
-        <el-descriptions-item label="IP Address">{{ result.ip_addr }}</el-descriptions-item>
-        <el-descriptions-item label="Host Name">{{ result.host_name }}</el-descriptions-item>
-        <el-descriptions-item label="MAC Address" :span="2">{{ result.mac_addr }}</el-descriptions-item>
-        <el-descriptions-item label="OS Name">{{ result.os_name }}</el-descriptions-item>
-        <el-descriptions-item label="CPE">{{ result.cpe }}</el-descriptions-item>
-      </el-descriptions>
+      <div v-if="result.ip_addr">
+        <el-descriptions
+            title="Scan Result"
+            direction="vertical"
+            :column="4"
+            border
+          >
+          <el-descriptions-item label="IP Address">{{ result.ip_addr }}</el-descriptions-item>
+          <el-descriptions-item label="Host Name">{{ result.host_name }}</el-descriptions-item>
+          <el-descriptions-item label="MAC Address" :span="2">{{ result.mac_addr }}</el-descriptions-item>
+          <el-descriptions-item label="OS Name">{{ result.os_name }}</el-descriptions-item>
+          <el-descriptions-item label="CPE">{{ result.cpe }}</el-descriptions-item>
+        </el-descriptions>
 
-      <el-table :data="result.ports" style="width: 100%" class="mt-2">
-        <el-table-column prop="port_number" label="Port No" />
-        <el-table-column prop="port_status" label="Status"  />
-        <el-table-column prop="service_name" label="Service Name" />
-        <el-table-column prop="service_version" label="Service Version" />
-      </el-table>
+        <el-table :data="result.ports" style="width: 100%" class="mt-2">
+          <el-table-column prop="port_number" label="Port No" />
+          <el-table-column prop="port_status" label="Status"  />
+          <el-table-column prop="service_name" label="Service Name" />
+          <el-table-column prop="service_version" label="Service Version" />
+        </el-table>
+      </div>
+      <div v-else>
+        <el-descriptions
+            title="Scan Result"
+            direction="vertical"
+            :column="4"
+            border
+          >
+        </el-descriptions>
+        <el-result icon="info" title="No Data">
+          <template #sub-title>
+          </template>
+          <template #extra>
+          </template>
+        </el-result>
+      </div>
     </div>
     <!-- Results -->
+
     <!-- Dialog -->
-    <el-dialog v-model="dialog_list_visible" title="Target Ports">
+    <el-dialog v-model="dialog_list_visible" title="Custom Port List">
       <el-tag
         v-for="tag in port_tags"
         :key="tag"
