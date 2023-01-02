@@ -21,9 +21,9 @@ pub fn get_tcp_map() -> HashMap<String, String> {
 }
 
 pub fn get_default_ports() -> Vec<u16> {
-    let rs_nscan_default_ports: Vec<&str> = define::NODEMAP_DEFAULT_PORTS.trim().split("\n").collect();
+    let rs_default_ports: Vec<&str> = define::NODEMAP_DEFAULT_PORTS.trim().split("\n").collect();
     let mut default_ports: Vec<u16> = vec![];
-    for r in rs_nscan_default_ports {
+    for r in rs_default_ports {
         match r.trim_end().parse::<u16>() {
             Ok(port) => {
                 default_ports.push(port);
@@ -32,6 +32,20 @@ pub fn get_default_ports() -> Vec<u16> {
         }
     }
     default_ports
+}
+
+pub fn get_wellknown_ports() -> Vec<u16> {
+    let rs_wellknown_ports: Vec<&str> = define::NODEMAP_WELLKNOWN_PORTS.trim().split("\n").collect();
+    let mut wellknown_ports: Vec<u16> = vec![];
+    for r in rs_wellknown_ports {
+        match r.trim_end().parse::<u16>() {
+            Ok(port) => {
+                wellknown_ports.push(port);
+            },
+            Err(_) => {},
+        }
+    }
+    wellknown_ports
 }
 
 pub fn get_http_ports() -> Vec<u16> {

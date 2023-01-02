@@ -50,7 +50,7 @@ impl PortArg {
         }
         let mut target: TargetInfo = TargetInfo::new_with_ip_addr(ip_addr);
         if self.port_option == String::from("well_known") {
-            target.ports = db::get_default_ports();
+            target.ports = db::get_wellknown_ports();
         }else if self.port_option == String::from("custom_list") {
             target.ports = self.ports.clone();
         }else{
