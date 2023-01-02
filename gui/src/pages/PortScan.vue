@@ -176,7 +176,7 @@ onUnmounted(() => {
                     />
                 </el-select>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="3">
                 <p style="font-size: var(--el-font-size-small)">Port List</p>
                 <el-button type="info" plain @click="dialog_list_visible = true">List</el-button>
             </el-col>
@@ -198,7 +198,7 @@ onUnmounted(() => {
             <el-col :span="6">
                 <el-checkbox v-model="option.service_detection_flag" label="Service Detection" />
             </el-col>
-            <el-col :span="6">
+            <el-col :span="3">
                 <el-checkbox v-model="option.os_detection_flag" label="OS Detection" />
             </el-col>
             <el-col :span="6">
