@@ -65,7 +65,7 @@ const port_options = [
   },
   {
     value: PORT_OPTION_WELL_KNOWN,
-    label: 'Well Known(Top 1000)',
+    label: 'Well Known(685 ports)',
   },
   {
     value: PORT_OPTION_CUSTOM_LIST,
