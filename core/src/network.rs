@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::net::{IpAddr, Ipv4Addr};
+use std::str::FromStr;
 use ipnet::{Ipv4Net, Ipv6Net};
 use pnet_packet::{Packet, MutablePacket};
 
@@ -138,6 +139,18 @@ pub fn lookup_host_name(host_name: String) -> Option<IpAddr> {
         return Some(ipv6_vec[0])
     }else{
         None
+    }
+}
+
+pub fn lookup_ip_addr(ip_addr: String) -> String {
+    let ip_addr: IpAddr = IpAddr::from_str(ip_addr.as_str()).unwrap();
+    match dns_lookup::lookup_addr(&ip_addr) {
+        Ok(hostname) => {
+            return hostname;
+        },
+        Err(_) => {
+            return String::new();
+        },
     }
 }
 
