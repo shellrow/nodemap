@@ -4,6 +4,7 @@ use tauri::Manager;
 use nodemap_core::option::{ScanOption};
 use nodemap_core::result::{PortScanResult, HostScanResult, PingStat};
 use nodemap_core::scan;
+use nodemap_core::network;
 
 use crate::models;
 
@@ -87,4 +88,18 @@ pub async fn exec_ping(opt: models::PingArg, app_handle: tauri::AppHandle) -> Pi
     } 
     let result: PingStat = handle.join().unwrap();
     result
+}
+
+#[tauri::command]
+pub fn lookup_hostname(hostname: String) -> String {
+    if let Some(ip_addr) = network::lookup_host_name(hostname) {
+        return ip_addr.to_string();
+    }else{
+        return String::new();
+    }
+}
+
+#[tauri::command]
+pub fn lookup_ipaddr(ipaddr: String) -> String {
+    return network::lookup_ip_addr(ipaddr);
 }
