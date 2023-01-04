@@ -2,11 +2,12 @@
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
 import { debounce } from 'lodash';
-import {sleep} from '../logic/shared.js';
+import {sleep, isValidIPaddress, isValidHostname} from '../logic/shared.js';
 import {PROTOCOL_ICMPv4, PROTOCOL_TCP, HOSTSCAN_TYPE_NETWORK, HOSTSCAN_TYPE_CUSTOM_HOSTS} from '../define.js';
 
 const scanning = ref(false);
 const dialog_list_visible = ref(false);
+const target_host = ref("");
 
 const option = reactive({
   network_address: "",
@@ -49,6 +50,30 @@ const scan_type_options = [
     label: 'Custom List',
   },
 ];
+
+const addTargetHost = () => {
+    if (target_host.value) {
+        let target = {ip_addr: target_host.value, host_name: target_host.value};
+        if (isValidIPaddress(target_host.value)) {
+            invoke('lookup_ipaddr',{ipaddr:target_host.value}).then((hostname) => {
+                target.host_name = hostname; 
+                if (!option.target_hosts.includes(target)){
+                    option.target_hosts.push(target);
+                }
+            });
+        }else{
+            if (isValidHostname(target_host.value)){
+                invoke('lookup_hostname',{hostname:target_host.value}).then((ip_addr) => {
+                    target.ip_addr = ip_addr;
+                    if (!option.target_hosts.includes(target)){
+                        option.target_hosts.push(target);
+                    }
+                });
+            }
+        }
+    }
+    target_host.value = "";
+};
 
 const runHostScan = async() => {
     scanning.value = true;
@@ -170,4 +195,61 @@ onUnmounted(() => {
         </el-row>
         <!-- Options -->
     </el-card>
+    <!-- Results -->
+    <div v-loading="scanning" element-loading-text="Scanning..." class="mt-2">
+        <div v-if="result.hosts.length > 0">
+            <el-descriptions
+                title="Scan Result"
+                direction="vertical"
+                :column="4"
+                border
+            >
+            </el-descriptions>
+            <el-table :data="result.hosts" style="width: 100%" class="mt-2">
+                <el-table-column prop="ip_addr" label="IP Address" />
+                <el-table-column prop="host_name" label="Host Name"  />
+                <el-table-column prop="os_name" label="OS Name" />
+                <el-table-column prop="mac_addr" label="MAC Address" />
+                <el-table-column prop="vendor_info" label="Vendor Info" />
+            </el-table>
+        </div>
+        <div v-else>
+            <el-descriptions
+                title="Scan Result"
+                direction="vertical"
+                :column="4"
+                border
+            >
+            </el-descriptions>
+            <el-result icon="info" title="No Data">
+                <template #sub-title>
+                </template>
+                <template #extra>
+                </template>
+            </el-result>
+        </div>
+    </div>
+    <!-- Results -->
+
+    <!-- Dialog -->
+    <el-dialog v-model="dialog_list_visible" title="Custom Host List">
+        <el-row :gutter="20">
+            <el-col :span="6">
+                <el-input v-model="target_host" placeholder="IP Address or Host Name" @keyup.enter="addTargetHost" @blur="addTargetHost" />
+            </el-col>
+            <el-col :span="6">
+                <el-button type="info" plain @click="addTargetHost">Add</el-button>
+            </el-col>
+        </el-row>
+        <el-table :data="option.target_hosts">
+            <el-table-column property="ip_addr" label="IP Address" />
+            <el-table-column property="host_name" label="Host Name" />
+        </el-table>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="dialog_list_visible = false">Close</el-button>
+            </span>
+        </template>
+    </el-dialog>
+    <!-- Dialog -->
 </template>
