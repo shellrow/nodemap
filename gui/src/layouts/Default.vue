@@ -3,7 +3,7 @@ import {ref ,onMounted, onUnmounted} from 'vue';
 import {debounce} from 'lodash';
 import {Document, Menu as IconMenu, Setting, Sunny, Moon, Expand, Fold, View} from '@element-plus/icons-vue';
 
-import NodeMapLogo from "../assets/nodemap_logo.png";
+import NodeMapLogo from "../assets/nodemap_icon.png";
 
 const innerWidth = ref(window.innerWidth);
 const innerHeight = ref(window.innerHeight);
@@ -82,7 +82,7 @@ onUnmounted(() => {
                 <el-menu default-active="1" :collapse="isCollapse" :style="'min-height:'+ innerHeight + 'px'" @open="handleOpen" @close="handleClose">
                     <el-menu-item index="0">
                         <router-link to="/">
-                            <img class="img" :src="NodeMapLogo" width="70" />
+                            <img class="img" :src="NodeMapLogo" width="50" />
                         </router-link>
                     </el-menu-item>
                     <el-menu-item index="1">
