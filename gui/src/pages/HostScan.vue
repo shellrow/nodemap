@@ -8,6 +8,7 @@ import {PROTOCOL_ICMPv4, PROTOCOL_TCP, HOSTSCAN_TYPE_NETWORK, HOSTSCAN_TYPE_CUST
 const scanning = ref(false);
 const dialog_list_visible = ref(false);
 const target_host = ref("");
+const target_hosts = ref([]);
 
 const option = reactive({
   network_address: "",
@@ -57,20 +58,21 @@ const addTargetHost = () => {
         if (isValidIPaddress(target_host.value)) {
             invoke('lookup_ipaddr',{ipaddr:target_host.value}).then((hostname) => {
                 target.host_name = hostname; 
-                if (!option.target_hosts.includes(target)){
-                    option.target_hosts.push(target);
+                if (!target_hosts.value.includes(target)){
+                    target_hosts.value.push(target);
                 }
             });
         }else{
             if (isValidHostname(target_host.value)){
                 invoke('lookup_hostname',{hostname:target_host.value}).then((ip_addr) => {
                     target.ip_addr = ip_addr;
-                    if (!option.target_hosts.includes(target)){
-                        option.target_hosts.push(target);
+                    if (!target_hosts.value.includes(target)){
+                        target_hosts.value.push(target);
                     }
                 });
             }
         }
+        option.target_hosts.push(target.ip_addr);
     }
     target_host.value = "";
 };
@@ -241,7 +243,7 @@ onUnmounted(() => {
                 <el-button type="info" plain @click="addTargetHost">Add</el-button>
             </el-col>
         </el-row>
-        <el-table :data="option.target_hosts">
+        <el-table :data="target_hosts">
             <el-table-column property="ip_addr" label="IP Address" />
             <el-table-column property="host_name" label="Host Name" />
         </el-table>
