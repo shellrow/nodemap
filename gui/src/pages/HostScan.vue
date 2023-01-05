@@ -77,6 +77,11 @@ const addTargetHost = () => {
     target_host.value = "";
 };
 
+const deleteRow = (index) => {
+    target_hosts.value.splice(index, 1);
+    option.target_hosts.splice(index, 1);
+}
+
 const runHostScan = async() => {
     scanning.value = true;
     const opt = {
@@ -246,6 +251,13 @@ onUnmounted(() => {
         <el-table :data="target_hosts">
             <el-table-column property="ip_addr" label="IP Address" />
             <el-table-column property="host_name" label="Host Name" />
+            <el-table-column fixed="right" label="Operations" width="120">
+                <template #default="scope">
+                    <el-button type="danger" size="small" @click.prevent="deleteRow(scope.$index)">
+                        Remove
+                    </el-button>
+                </template>
+            </el-table-column>
         </el-table>
         <template #footer>
             <span class="dialog-footer">
