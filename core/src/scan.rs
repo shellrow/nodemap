@@ -21,7 +21,7 @@ use crate::{define, network};
 
 pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::PortScanResult {
     let mut port_scanner = match PortScanner::new(opt.src_ip){
-        Ok(scanner) => (scanner),
+        Ok(scanner) => scanner,
         Err(e) => panic!("Error creating scanner: {}", e),
     };
     let dst: Destination = Destination::new(opt.targets[0].ip_addr, opt.targets[0].ports.clone());
@@ -46,7 +46,7 @@ pub fn run_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan:
 
 pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::PortScanResult {
     let mut port_scanner = match AsyncPortScanner::new(opt.src_ip){
-        Ok(scanner) => (scanner),
+        Ok(scanner) => scanner,
         Err(e) => panic!("Error creating scanner: {}", e),
     };
     let dst: Destination = Destination::new(opt.targets[0].ip_addr, opt.targets[0].ports.clone());
@@ -73,7 +73,7 @@ pub async fn run_async_port_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>)
 
 pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::HostScanResult {
     let mut host_scanner = match HostScanner::new(opt.src_ip){
-        Ok(scanner) => (scanner),
+        Ok(scanner) => scanner,
         Err(e) => panic!("Error creating scanner: {}", e),
     };
     for target in opt.targets {
@@ -100,7 +100,7 @@ pub fn run_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan:
 
 pub async fn run_async_host_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> netscan::result::HostScanResult {
     let mut host_scanner = match AsyncHostScanner::new(opt.src_ip){
-        Ok(scanner) => (scanner),
+        Ok(scanner) => scanner,
         Err(e) => panic!("Error creating scanner: {}", e),
     };
     for target in opt.targets {
@@ -436,7 +436,7 @@ pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceRe
 
 pub fn run_domain_scan(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> DomainScanResult {
     let mut domain_scanner = match DomainScanner::new(){
-        Ok(scanner) => (scanner),
+        Ok(scanner) => scanner,
         Err(e) => panic!("Error creating scanner: {}", e),
     };
     domain_scanner.set_base_domain(opt.targets[0].base_domain.clone());
