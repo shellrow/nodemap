@@ -83,8 +83,7 @@ pub async fn exec_ping(opt: models::PingArg, app_handle: tauri::AppHandle) -> Pi
     });
     //Progress
     while let Ok(msg) = msg_rx.recv() {
-        println!("[exec_ping] {:?}", msg);
-        app_handle.emit_all("ping_progress", format!("rs: {}", msg)).unwrap();
+        app_handle.emit_all("ping_progress", format!("{}", msg)).unwrap();
     } 
     let result: PingStat = handle.join().unwrap();
     result
