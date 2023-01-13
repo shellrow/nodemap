@@ -44,6 +44,16 @@ const protocol_options = [
 
 const ping_progress = ref([]);
 
+const initResult = () => {
+  result.ping_results = [];
+  result.probe_time = "";
+  result.transmitted_count = 0;
+  result.received_count = 0;
+  result.min = "";
+  result.avg = ""; 
+  result.max = "";
+}
+
 const runPing = async() => {
   const unlisten = await listen('ping_progress', (event) => {
     console.log(event);
@@ -54,6 +64,7 @@ const runPing = async() => {
       }
     );
   });
+  initResult();
   pinging.value = true;
   const opt = {
     target_host: option.target_host,
@@ -65,17 +76,26 @@ const runPing = async() => {
   };
   invoke('exec_ping', { "opt": opt }).then((ping_stat) => {
     console.log(ping_stat);
-    result.ping_results = ping_stat.ping_results;
+    ping_stat.ping_results.forEach(ping_result => {
+      result.ping_results.push({
+        protocol: ping_result.protocol,
+        seq: ping_result.seq,
+        ip_addr: ping_result.ip_addr,
+        host_name: ping_result.host_name,
+        port_number: ping_result.port_number,
+        ttl: ping_result.ttl,
+        hop: ping_result.hop,
+        rtt: ping_result.rtt / 1000,
+        status: ping_result.status,
+      });
+    });
+    //result.ping_results = ping_stat.ping_results;
     result.transmitted_count = ping_stat.transmitted_count;
     result.received_count = ping_stat.received_count;
-    const probe_time = parseFloat(`${ping_stat.probe_time.secs}.${ping_stat.probe_time.nanos}`);
-    const min = parseFloat(`${ping_stat.min.secs}.${ping_stat.min.nanos}`);
-    const avg = parseFloat(`${ping_stat.avg.secs}.${ping_stat.avg.nanos}`);
-    const max = parseFloat(`${ping_stat.max.secs}.${ping_stat.max.nanos}`);
-    result.probe_time = probe_time.toFixed(4);
-    result.min = min.toFixed(4);
-    result.avg = avg.toFixed(4);
-    result.max = max.toFixed(4);
+    result.probe_time = ping_stat.probe_time / 1000;
+    result.min = ping_stat.min / 1000;
+    result.avg = ping_stat.avg / 1000;
+    result.max = ping_stat.max / 1000;
     console.log(result);
     pinging.value = false;
     ping_progress.value = [];
@@ -173,7 +193,7 @@ onUnmounted(() => {
             <el-table-column prop="port_number" label="Port" />
             <el-table-column prop="ttl" label="TTL" />
             <el-table-column prop="hop" label="HOP" />
-            <el-table-column prop="rtt" label="RTT" />
+            <el-table-column prop="rtt" label="RTT(ms)" />
             <el-table-column prop="status" label="Status" />
         </el-table>
       </div>
