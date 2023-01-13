@@ -153,8 +153,8 @@ pub struct PingResult {
     pub ttl: u8,
     /// Number of hops
     pub hop: u8,
-    /// Round Trip Time
-    pub rtt: Duration,
+    /// Round Trip Time (microsecond)
+    pub rtt: u64,
     /// Status
     pub status: ProbeStatus,
     /// Protocol
@@ -165,30 +165,30 @@ pub struct PingResult {
 pub struct PingStat {
     /// Results
     pub ping_results: Vec<PingResult>,
-    /// The entire ping probe time
-    pub probe_time: Duration,
+    /// The entire ping probe time (microsecond)
+    pub probe_time: u64,
     /// Transmitted packets
     pub transmitted_count: usize,
     /// Received packets
     pub received_count: usize,
-    /// Minimum RTT
-    pub min: Duration,
-    /// Avarage RTT
-    pub avg: Duration,
-    /// Maximum RTT
-    pub max: Duration,
+    /// Minimum RTT (microsecond)
+    pub min: u64,
+    /// Avarage RTT (microsecond)
+    pub avg: u64,
+    /// Maximum RTT (microsecond)
+    pub max: u64,
 }
 
 impl PingStat {
     pub fn new() -> PingStat {
         PingStat { 
             ping_results: vec![], 
-            probe_time: Duration::from_millis(0), 
+            probe_time: 0, 
             transmitted_count: 0, 
             received_count: 0, 
-            min: Duration::from_millis(0), 
-            avg: Duration::from_millis(0), 
-            max: Duration::from_millis(0) 
+            min: 0, 
+            avg: 0, 
+            max: 0 
         }
     }
 }
