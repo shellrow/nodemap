@@ -357,7 +357,7 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
     }
     let ping_result: tracert::ping::PingResult = handle.join().unwrap().unwrap();
     let mut result = PingStat::new();
-    result.probe_time = ping_result.probe_time;
+    result.probe_time = ping_result.probe_time.as_micros() as u64;
     result.transmitted_count = ping_result.results.len();
     result.received_count = ping_result.results.len();
     let mut rtt_vec: Vec<u128> = vec![];
@@ -369,12 +369,12 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
             port_number : if opt.targets[0].ports.len() > 0 { Some(opt.targets[0].ports[0]) } else { None }, 
             ttl : node.ttl.unwrap_or(0),
             hop : node.hop.unwrap_or(0),
-            rtt : node.rtt,
+            rtt : node.rtt.as_micros()as u64,
             status : ProbeStatus::Done,
             protocol : opt.protocol.name(),
         };
         result.ping_results.push(r);
-        rtt_vec.push(node.rtt.as_millis());
+        rtt_vec.push(node.rtt.as_micros());
     }
     let min: u128;
     let max: u128;
@@ -387,10 +387,9 @@ pub fn run_ping(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> PingStat {
         Some(n) => max = *n,
         None => unreachable!(),
     }
-    result.min = Duration::from_millis(min as u64);
-    result.max = Duration::from_millis(max as u64);
-    result.avg = Duration::from_millis(avg as u64);
-
+    result.min = min as u64;
+    result.max = max as u64;
+    result.avg = avg as u64;
     result
 }
 
