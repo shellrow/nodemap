@@ -78,54 +78,54 @@ onUnmounted(() => {
 <template>
     <div class="common-layout">
         <el-container>
-            <el-aside id="side-menu" :width="isCollapse ? '80px' : '200px'" class="duration-300" >
-                <el-menu default-active="1" :collapse="isCollapse" :style="'min-height:'+ innerHeight + 'px'" @open="handleOpen" @close="handleClose">
-                    <el-menu-item index="0">
-                        <router-link to="/">
-                            <img class="img" :src="NodeMapLogo" width="50" />
-                        </router-link>
-                    </el-menu-item>
-                    <el-menu-item index="1">
-                        <el-icon><IconMenu /></el-icon>
-                        <template #title><router-link to="/">Map</router-link></template>
-                    </el-menu-item>
-                    <el-sub-menu index="2">
-                        <template #title>
-                            <el-icon><View /></el-icon>
-                            <span>Probe</span>
-                        </template>
-                        <el-menu-item index="2-1"><router-link to="/port">PortScan</router-link></el-menu-item>
-                        <el-menu-item index="2-2"><router-link to="/host">HostScan</router-link></el-menu-item>
-                        <el-menu-item index="2-3"><router-link to="/ping">Ping</router-link></el-menu-item>
-                        <el-menu-item index="2-4"><router-link to="/trace">Traceroute</router-link></el-menu-item>
+            <el-header>
+                <el-menu :default-active="activeIndex" mode="horizontal" :ellipsis="false" @select="handleSelect">
+                    <el-button type="primary" plain size="large" style="margin-left: 4px; margin-top: 10px" @click="handleCollapse">
+                        <el-icon v-if="isCollapse"><Expand /></el-icon>
+                        <el-icon v-else><Fold /></el-icon>
+                    </el-button>
+                    <div class="flex-grow" />
+                    <el-menu-item index="0"><router-link to="/system">System</router-link></el-menu-item>
+                    <el-sub-menu index="1">
+                        <template #title>Account</template>
+                        <el-menu-item index="1-1"><router-link to="/profile">Profile</router-link></el-menu-item>
+                        <el-menu-item index="1-2"><router-link to="/login">Login</router-link></el-menu-item>
                     </el-sub-menu>
-                    <el-menu-item index="3">
-                        <el-icon><Document /></el-icon>
-                        <template #title><router-link to="/log">Log</router-link></template>
-                    </el-menu-item>
-                    <el-menu-item index="4">
-                        <el-icon><Setting /></el-icon>
-                        <template #title><router-link to="/setting">Setting</router-link></template>
-                    </el-menu-item>
+                    <el-switch v-model="mode" @click="changeMode" style="margin-left: 24px; margin-top: 12px;" inline-prompt :active-icon="Sunny" :inactive-icon="Moon" />
                 </el-menu>
-            </el-aside>
+            </el-header>
             <el-container>
-                <el-header>
-                    <el-menu :default-active="activeIndex" mode="horizontal" :ellipsis="false" @select="handleSelect">
-                        <el-button type="primary" plain size="large" style="margin-left: 4px; margin-top: 10px" @click="handleCollapse">
-                            <el-icon v-if="isCollapse"><Expand /></el-icon>
-                            <el-icon v-else><Fold /></el-icon>
-                        </el-button>
-                        <div class="flex-grow" />
-                        <el-menu-item index="0"><router-link to="/system">System</router-link></el-menu-item>
-                        <el-sub-menu index="1">
-                            <template #title>Account</template>
-                            <el-menu-item index="1-1"><router-link to="/profile">Profile</router-link></el-menu-item>
-                            <el-menu-item index="1-2"><router-link to="/login">Login</router-link></el-menu-item>
+                <el-aside id="side-menu" :width="isCollapse ? '80px' : '200px'" class="duration-300" >
+                    <el-menu default-active="1" :collapse="isCollapse" :style="'min-height:'+ innerHeight + 'px'" @open="handleOpen" @close="handleClose">
+                        <el-menu-item index="0">
+                            <router-link to="/">
+                                <img class="img" :src="NodeMapLogo" width="50" />
+                            </router-link>
+                        </el-menu-item>
+                        <el-menu-item index="1">
+                            <el-icon><IconMenu /></el-icon>
+                            <template #title><router-link to="/">Map</router-link></template>
+                        </el-menu-item>
+                        <el-sub-menu index="2">
+                            <template #title>
+                                <el-icon><View /></el-icon>
+                                <span>Probe</span>
+                            </template>
+                            <el-menu-item index="2-1"><router-link to="/port">PortScan</router-link></el-menu-item>
+                            <el-menu-item index="2-2"><router-link to="/host">HostScan</router-link></el-menu-item>
+                            <el-menu-item index="2-3"><router-link to="/ping">Ping</router-link></el-menu-item>
+                            <el-menu-item index="2-4"><router-link to="/trace">Traceroute</router-link></el-menu-item>
                         </el-sub-menu>
-                        <el-switch v-model="mode" @click="changeMode" style="margin-left: 24px; margin-top: 12px;" inline-prompt :active-icon="Sunny" :inactive-icon="Moon" />
+                        <el-menu-item index="3">
+                            <el-icon><Document /></el-icon>
+                            <template #title><router-link to="/log">Log</router-link></template>
+                        </el-menu-item>
+                        <el-menu-item index="4">
+                            <el-icon><Setting /></el-icon>
+                            <template #title><router-link to="/setting">Setting</router-link></template>
+                        </el-menu-item>
                     </el-menu>
-                </el-header>
+                </el-aside>
                 <el-main>
                     <div>
                         <slot />
@@ -134,4 +134,5 @@ onUnmounted(() => {
             </el-container>
         </el-container>
     </div>
+
 </template>
