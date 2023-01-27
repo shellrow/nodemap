@@ -127,9 +127,11 @@ onUnmounted(() => {
                     </el-menu>
                 </el-aside>
                 <el-main>
-                    <div>
-                        <slot />
-                    </div>
+                    <el-scrollbar :height="innerHeight-100+'px'" >
+                        <div>
+                            <slot />
+                        </div>
+                    </el-scrollbar>
                 </el-main>
             </el-container>
         </el-container>
