@@ -84,6 +84,9 @@ onUnmounted(() => {
                         <el-icon v-if="isCollapse"><Expand /></el-icon>
                         <el-icon v-else><Fold /></el-icon>
                     </el-button>
+                    <router-link to="/">
+                        <img class="img" :src="NodeMapLogo" width="40" style="margin-left: 4px; margin-top: 10px" />
+                    </router-link>
                     <div class="flex-grow" />
                     <el-menu-item index="0"><router-link to="/system">System</router-link></el-menu-item>
                     <el-sub-menu index="1">
@@ -98,9 +101,7 @@ onUnmounted(() => {
                 <el-aside id="side-menu" :width="isCollapse ? '80px' : '200px'" class="duration-300" >
                     <el-menu default-active="1" :collapse="isCollapse" :style="'min-height:'+ innerHeight + 'px'" @open="handleOpen" @close="handleClose">
                         <el-menu-item index="0">
-                            <router-link to="/">
-                                <img class="img" :src="NodeMapLogo" width="50" />
-                            </router-link>
+                            <template #title><router-link to="/">Dashboard</router-link></template>
                         </el-menu-item>
                         <el-menu-item index="1">
                             <el-icon><IconMenu /></el-icon>
