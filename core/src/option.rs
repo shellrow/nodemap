@@ -351,4 +351,7 @@ impl ScanOption {
             }
         }
     }
+    pub fn set_timeout_from_milis(&mut self, timeout: u64) {
+        self.timeout = Duration::from_millis(timeout);
+    }
 }

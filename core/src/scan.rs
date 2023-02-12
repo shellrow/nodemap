@@ -429,7 +429,7 @@ pub fn run_traceroute(opt: ScanOption, msg_tx: &mpsc::Sender<String>) -> TraceRe
         tracert::trace::TraceStatus::Error => ProbeStatus::Error,
         tracert::trace::TraceStatus::Timeout => ProbeStatus::Timeout,
     };
-    result.probe_time = trace_result.probe_time;
+    result.probe_time = trace_result.probe_time.as_micros() as u64;
     result
 }
 

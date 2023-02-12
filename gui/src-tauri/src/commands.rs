@@ -2,7 +2,7 @@ use std::sync::mpsc::{channel ,Sender, Receiver};
 use std::thread;
 use tauri::Manager;
 use nodemap_core::option::{ScanOption};
-use nodemap_core::result::{PortScanResult, HostScanResult, PingStat};
+use nodemap_core::result::{PortScanResult, HostScanResult, PingStat, TraceResult};
 use nodemap_core::scan;
 use nodemap_core::network;
 
@@ -86,6 +86,24 @@ pub async fn exec_ping(opt: models::PingArg, app_handle: tauri::AppHandle) -> Pi
         app_handle.emit_all("ping_progress", format!("{}", msg)).unwrap();
     } 
     let result: PingStat = handle.join().unwrap();
+    result
+}
+
+#[tauri::command]
+pub async fn exec_traceroute(opt: models::TracerouteArg, app_handle: tauri::AppHandle) -> TraceResult {
+    let probe_opt: ScanOption = opt.to_scan_option();
+    let m_probe_opt: ScanOption = probe_opt.clone();
+    let (msg_tx, msg_rx): (Sender<String>, Receiver<String>) = channel();
+    let handle = thread::spawn(move|| {
+        async_io::block_on(async {
+            scan::run_traceroute(m_probe_opt, &msg_tx)
+        })
+    });
+    //Progress
+    while let Ok(msg) = msg_rx.recv() {
+        app_handle.emit_all("trace_progress", format!("{}", msg)).unwrap();
+    } 
+    let result: TraceResult = handle.join().unwrap();
     result
 }
 

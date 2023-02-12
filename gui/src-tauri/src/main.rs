@@ -7,7 +7,7 @@ mod define;
 mod db;
 mod models;
 mod commands;
-use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan, exec_hostscan, exec_ping, lookup_hostname, lookup_ipaddr};
+use commands::{test_command, test_command_arg, test_command_return, test_command_result, test_command_async, exec_portscan, exec_hostscan, exec_ping, exec_traceroute, lookup_hostname, lookup_ipaddr};
 
 fn main() {
   tauri::Builder::default()
@@ -20,6 +20,7 @@ fn main() {
       exec_portscan, 
       exec_hostscan,
       exec_ping,
+      exec_traceroute,
       lookup_hostname,
       lookup_ipaddr
       ])

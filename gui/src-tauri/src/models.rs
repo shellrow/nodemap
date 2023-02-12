@@ -184,3 +184,40 @@ impl PingArg {
         opt
     }
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct TracerouteArg {
+    target_host: String,
+    max_hop: u8,
+    timeout: u64,
+    os_detection_flag: bool,
+    save_flag: bool,
+}
+
+impl TracerouteArg {
+    pub fn to_scan_option(&self) -> nodemap_core::option::ScanOption {
+        let mut opt: ScanOption = ScanOption::default();
+        opt.command_type = CommandType::Traceroute;
+        opt.set_timeout_from_milis(self.timeout);
+        // TODO: IPv6 support
+        let target_ip: IpAddr = match self.target_host.parse::<IpAddr>(){
+                                    Ok(ip) => {
+                                        ip
+                                    },
+                                    Err(_) => {
+                                        match network::lookup_host_name(self.target_host.clone()) {
+                                            Some(ip) => {
+                                                ip
+                                            },
+                                            None => {
+                                                return opt;
+                                            }
+                                        }
+                                    },
+                                };
+        opt.targets.push(TargetInfo::new_with_ip_addr(target_ip));
+        opt.protocol = Protocol::UDP;
+        opt.max_hop = self.max_hop;
+        opt
+    }
+}

@@ -200,7 +200,7 @@ pub struct TraceResult {
     /// Traceroute status
     pub status: ProbeStatus,
     /// The entire traceroute time
-    pub probe_time: Duration,
+    pub probe_time: u64,
 }
 
 impl TraceResult {
@@ -208,7 +208,7 @@ impl TraceResult {
         TraceResult {
             nodes:vec![],
             status: ProbeStatus::Done,
-            probe_time: Duration::from_millis(0),
+            probe_time: 0,
         }
     }
 }
