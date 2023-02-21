@@ -192,16 +192,16 @@ onUnmounted(() => {
             </el-col>
         </el-row>
         <el-row :gutter="20">
-            <el-col :span="6">
+            <el-col :span="4">
                 <el-checkbox v-model="option.async_flag" label="Async" />
             </el-col>
-            <el-col :span="6">
+            <el-col :span="4">
                 <el-checkbox v-model="option.service_detection_flag" label="Service Detection" />
             </el-col>
-            <el-col :span="3">
+            <el-col :span="4">
                 <el-checkbox v-model="option.os_detection_flag" label="OS Detection" />
             </el-col>
-            <el-col :span="6">
+            <el-col :span="4">
                 <el-checkbox v-model="option.save_flag" label="Save" />
             </el-col>
         </el-row>
