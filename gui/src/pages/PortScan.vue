@@ -1,8 +1,8 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
-import { debounce } from 'lodash';
-import {sleep} from '../logic/shared.js';
+//import { debounce } from 'lodash';
+//import {sleep} from '../logic/shared.js';
 import {PORT_OPTION_DEFAULT,PORT_OPTION_WELL_KNOWN,PORT_OPTION_CUSTOM_LIST,PORTSCAN_TYPE_TCP_SYN,PORTSCAN_TYPE_TCP_CONNECT} from '../define.js';
 
 const scanning = ref(false);
@@ -14,18 +14,18 @@ const port_tags = ref([]);
 const tag_input_visible = ref(false);
 const tag_input_ref = ref(null);
 
-const handle_tag_close = (tag) => {
+const handleTagClose = (tag) => {
   port_tags.value.splice(port_tags.value.indexOf(tag), 1);
 };
 
-const show_tag_input = () => {
+const showTagInput = () => {
   tag_input_visible.value = true;
   nextTick(() => {
     tag_input_ref.value.input.focus();
   });
 };
 
-const handle_input_confirm = () => {
+const handleInputConfirm = () => {
   if (tag_input_value.value) {
     if (!port_tags.value.includes(tag_input_value.value)){
       port_tags.value.push(tag_input_value.value);
@@ -73,7 +73,7 @@ const port_options = [
   },
 ];
 
-const scan_type_options = [
+const scanTypeOptions = [
   {
     value: PORTSCAN_TYPE_TCP_SYN,
     label: 'TCP SYN Scan',
@@ -88,7 +88,9 @@ const runPortScan = async() => {
   scanning.value = true;
   if (option.port_option === PORT_OPTION_CUSTOM_LIST) {
     port_tags.value.forEach(port => {
-      option.ports.push(parseInt(port));
+      if (!option.ports.includes(parseInt(port))) {
+        option.ports.push(parseInt(port));
+      }
     });
   }
   const opt = {
@@ -122,7 +124,30 @@ const runPortScan = async() => {
   });
 };
 
+const validateInput = () => {
+  if (!option.target_host) {
+    return false;
+  }  
+  return true;
+}
+
+const clearResult = () => {
+  result.ip_addr = "";
+  result.host_name = "";
+  result.ports = [];
+  result.mac_addr = "";
+  result.vendor_name = "";
+  result.os_name = "";
+  result.os_version = "";
+  result.cpe = "";
+  result.cpe_detail = "";  
+}
+
 const clickScan = (event) => {
+  if (!validateInput()) {
+    return;
+  }
+  clearResult();
   runPortScan();
 };
 
@@ -183,7 +208,7 @@ onUnmounted(() => {
             <el-col :span="6">
                 <p style="font-size: var(--el-font-size-small)">Scan Type</p>
                 <el-select v-model="option.scan_type" placeholder="Select">
-                    <el-option v-for="item in scan_type_options"
+                    <el-option v-for="item in scanTypeOptions"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value"
@@ -257,7 +282,7 @@ onUnmounted(() => {
         class="mx-1"
         closable
         :disable-transitions="false"
-        @close="handle_tag_close(tag)"
+        @close="handleTagClose(tag)"
       >
         {{ tag }}
       </el-tag>
@@ -270,10 +295,10 @@ onUnmounted(() => {
         v-model="tag_input_value"
         class="ml-1 w-20"
         size="small"
-        @keyup.enter="handle_input_confirm"
-        @blur="handle_input_confirm"
+        @keyup.enter="handleInputConfirm"
+        @blur="handleInputConfirm"
       />
-      <el-button v-else class="button-new-tag ml-1" size="small" @click="show_tag_input">
+      <el-button v-else class="button-new-tag ml-1" size="small" @click="showTagInput">
         + New Port
       </el-button>
       <template #footer>
