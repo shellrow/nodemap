@@ -1,9 +1,11 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue';
 import { invoke } from '@tauri-apps/api/tauri';
+import { ElMessage } from 'element-plus'
 //import { debounce } from 'lodash';
 //import {sleep} from '../logic/shared.js';
 import {PORT_OPTION_DEFAULT,PORT_OPTION_WELL_KNOWN,PORT_OPTION_CUSTOM_LIST,PORTSCAN_TYPE_TCP_SYN,PORTSCAN_TYPE_TCP_CONNECT} from '../define.js';
+import { isValidHostname, isValidIPaddress } from '../logic/shared';
 
 const scanning = ref(false);
 const dialog_list_visible = ref(false);
@@ -126,9 +128,13 @@ const runPortScan = async() => {
 
 const validateInput = () => {
   if (!option.target_host) {
-    return false;
+    return "Invalid host";
+  }
+  if (isValidIPaddress(option.target_host) || isValidHostname(option.target_host)) {
+    return "OK";
+  }else{
+    return "Invalid host";
   }  
-  return true;
 }
 
 const clearResult = () => {
@@ -144,7 +150,12 @@ const clearResult = () => {
 }
 
 const clickScan = (event) => {
-  if (!validateInput()) {
+  const inputStatus = validateInput();
+  if (inputStatus != "OK") {
+    ElMessage({
+      message: inputStatus,
+      type: 'warning',
+    })
     return;
   }
   clearResult();
