@@ -1,6 +1,6 @@
 [package]
 name = "nodemap"
-version = "0.2.0"
+version = "0.5.0"
 edition = "2021"
 authors = ["shellrow <shellrow@protonmail.com>"]
 description = "[WIP] Deadly simple network scanner"
