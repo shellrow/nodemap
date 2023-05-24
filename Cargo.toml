@@ -1,9 +1,13 @@
-[workspace]
-members = [
-    "core",
-    "cli"
-]
+[package]
+name = "nodemap"
+version = "0.2.0"
+edition = "2021"
+authors = ["shellrow <shellrow@protonmail.com>"]
+description = "[WIP] Deadly simple network scanner"
+repository = "https://github.com/shellrow/nodemap"
+readme = "README.md"
+keywords = ["network","scan","cli","cross-platform"]
+categories = ["network-programming"]
+license = "MIT"
 
-exclude = [
-    "gui/src-tauri"
-]
+[dependencies]
